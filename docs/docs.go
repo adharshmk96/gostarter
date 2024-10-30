@@ -15,6 +15,110 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/auth/login": {
+            "post": {
+                "description": "Login an account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Login an account",
+                "parameters": [
+                    {
+                        "description": "Account to login",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.GeneralResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.GeneralResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.GeneralResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/logout": {
+            "post": {
+                "description": "Logout an account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Logout an account",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.GeneralResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.GeneralResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/profile": {
+            "get": {
+                "description": "Get account profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Get account profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ProfileResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/helpers.GeneralResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/auth/register": {
             "post": {
                 "description": "Register a new account",
@@ -30,12 +134,30 @@ const docTemplate = `{
                 "summary": "Register a new account",
                 "parameters": [
                     {
-                        "description": "Account to register",
-                        "name": "account",
+                        "description": "Username",
+                        "name": "Username",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.RegisterAccountRequest"
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Email",
+                        "name": "Email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Password",
+                        "name": "Password",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -49,13 +171,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     }
                 }
@@ -63,14 +185,28 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.RegisterAccountRequest": {
+        "api.LoginRequest": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string"
-                },
                 "password": {
                     "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "username": {
                     "type": "string"
@@ -85,7 +221,7 @@ const docTemplate = `{
                 }
             }
         },
-        "common.GeneralResponse": {
+        "helpers.GeneralResponse": {
             "type": "object",
             "properties": {
                 "errors": {

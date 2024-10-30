@@ -1,28 +1,4 @@
 services:
-  nginx:
-    image: "nginx:alpine"
-    container_name: gostarter_nginx
-    ports:
-      - 80:80
-      - 443:443
-    depends_on:
-      - gostarter
-    configs:
-      - source: nginx_config
-        target: /etc/nginx/nginx.conf
-    restart: always
-
-  gostarter:
-    image: gostarter
-    container_name: gostarter
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./logs:/app/logs
-    restart: always
 
   gostarter_db:
     image: "postgres:13"

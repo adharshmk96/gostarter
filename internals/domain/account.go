@@ -1,6 +1,10 @@
 package domain
 
-import "net/http"
+import (
+	"errors"
+	"gostarter/internals/core/utils"
+	"net/http"
+)
 
 type Account struct {
 	ID int `json:"id"`
@@ -25,14 +29,27 @@ type AccountHandler interface {
 
 type AccountService interface {
 	Register(account *Account) error
+	Authenticate(email, password string) (*Account, error)
+
 	GetAccountByID(id int) (*Account, error)
 	GetAccountByEmail(email string) (*Account, error)
 	GetAccountByUsername(username string) (*Account, error)
 	UpdateAccount(account *Account) error
 	DeleteAccount(id int) error
 
-	ListAccounts() ([]*Account, error)
+	ListAccounts(utils.PaginationParams) ([]*Account, error)
 }
+
+type TokenService interface {
+	GenerateJWT(id int, username string, roles []string) (string, error)
+	VerifyJWT(token string) (bool, error)
+	ExtractAccount(token string) (*Account, error)
+}
+
+var (
+	ErrLoadingKey   = errors.New("error loading key")
+	ErrInvalidToken = errors.New("invalid token")
+)
 
 type AccountRepository interface {
 	CreateAccount(account *Account) error
@@ -42,5 +59,10 @@ type AccountRepository interface {
 	UpdateAccount(account *Account) error
 	DeleteAccount(id int) error
 
-	ListAccounts() ([]*Account, error)
+	ListAccounts(utils.PaginationParams) ([]*Account, error)
 }
+
+// Errors
+var (
+	ErrAccountNotFound = errors.New("account not found")
+)

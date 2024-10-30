@@ -1,4 +1,4 @@
-package common
+package helpers
 
 type GeneralResponse struct {
 	Message string   `json:"message"`

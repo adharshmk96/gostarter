@@ -44,5 +44,9 @@ build:
 
 # Run
 
+maiden: install init
+	docker compose -f docker-compose-dev.yml up --build
+	go run . serve
+
 run:
 	go run main.go serve

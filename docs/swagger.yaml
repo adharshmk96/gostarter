@@ -1,11 +1,20 @@
 basePath: /api
 definitions:
-  api.RegisterAccountRequest:
+  api.LoginRequest:
     properties:
-      email:
-        type: string
       password:
         type: string
+      username:
+        type: string
+    type: object
+  api.ProfileResponse:
+    properties:
+      id:
+        type: integer
+      roles:
+        items:
+          type: string
+        type: array
       username:
         type: string
     type: object
@@ -29,18 +38,98 @@ info:
   title: gostarter api
   version: "1.0"
 paths:
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login an account
+      parameters:
+      - description: Account to login
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/api.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+      summary: Login an account
+      tags:
+      - Account
+  /v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout an account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+      summary: Logout an account
+      tags:
+      - Account
+  /v1/auth/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get account profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ProfileResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+      summary: Get account profile
+      tags:
+      - Account
   /v1/auth/register:
     post:
       consumes:
       - application/json
       description: Register a new account
       parameters:
-      - description: Account to register
+      - description: Username
         in: body
-        name: account
+        name: Username
         required: true
         schema:
-          $ref: '#/definitions/api.RegisterAccountRequest'
+          type: string
+      - description: Email
+        in: body
+        name: Email
+        required: true
+        schema:
+          type: string
+      - description: Password
+        in: body
+        name: Password
+        required: true
+        schema:
+          type: string
       produces:
       - application/json
       responses:

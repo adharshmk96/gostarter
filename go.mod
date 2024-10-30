@@ -4,7 +4,10 @@ go 1.23.2
 
 require (
 	github.com/MarceloPetrucio/go-scalar-api-reference v0.0.0-20240521013641-ce5d2efe0e06
+	github.com/adharshmk96/goutils v0.0.1
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/cors v1.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/spf13/cobra v1.8.1

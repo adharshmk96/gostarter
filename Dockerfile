@@ -5,8 +5,8 @@ FROM alpine:latest
 WORKDIR /app
 
 # Copy the binary file from your host to your present location (PWD) in the image
-COPY ./bin/sharepoint_sync .
-COPY .sharepoint_sync.yaml .
+COPY ./bin/gostarter .
+COPY .gostarter.yaml.docker .gostarter.yaml
 
 # Command to run the executable
-ENTRYPOINT ["./sharepoint_sync", "serve"]
+ENTRYPOINT ["./gostarter", "serve"]

@@ -2,7 +2,7 @@
 @authuser=user@maildrop.cc
 @authpassword=Test123!
 
-POST {{serverUrl}}/api/auth/register
+POST {{serverUrl}}/api/v1/auth/register
 Content-Type: application/json
 
 {
@@ -12,20 +12,20 @@ Content-Type: application/json
 
 ###
 
-POST {{serverUrl}}/api/auth/login
+POST {{serverUrl}}/api/v1/auth/login
 Content-Type: application/json
 
 {
-    "email": "{{authuser}}",
+    "username": "{{authuser}}",
     "password": "{{authpassword}}"
 }
 
 ###
 
-POST {{serverUrl}}/api/auth/logout
+POST {{serverUrl}}/api/v1/auth/logout
 
 ###
 
-GET {{serverUrl}}/api/auth/profile
+GET {{serverUrl}}/api/v1/auth/profile
 
 ###
