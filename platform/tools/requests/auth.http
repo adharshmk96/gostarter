@@ -1,0 +1,31 @@
+@serverUrl=http://localhost:8080
+@authuser=user@maildrop.cc
+@authpassword=Test123!
+
+POST {{serverUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "{{authuser}}",
+    "password": "{{authpassword}}"
+}
+
+###
+
+POST {{serverUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{authuser}}",
+    "password": "{{authpassword}}"
+}
+
+###
+
+POST {{serverUrl}}/api/auth/logout
+
+###
+
+GET {{serverUrl}}/api/auth/profile
+
+###

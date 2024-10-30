@@ -1,0 +1,62 @@
+basePath: /api
+definitions:
+  api.RegisterAccountRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  api.RegisterAccountResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  common.GeneralResponse:
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a starter go project
+  title: gostarter api
+  version: "1.0"
+paths:
+  /v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new account
+      parameters:
+      - description: Account to register
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/api.RegisterAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.RegisterAccountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.GeneralResponse'
+      summary: Register a new account
+      tags:
+      - Account
+swagger: "2.0"

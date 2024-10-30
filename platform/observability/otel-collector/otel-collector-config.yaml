@@ -1,0 +1,22 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4319
+      grpc:
+        endpoint: 0.0.0.0:4320
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  otlp:
+    endpoint: "tempo:4317"
+
+service:
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      exporters: [ otlp ]
+    metrics:
+      receivers: [ otlp ]
+      exporters: [ prometheus ]

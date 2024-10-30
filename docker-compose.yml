@@ -1,0 +1,143 @@
+services:
+  nginx:
+    image: "nginx:alpine"
+    container_name: gostarter_nginx
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - gostarter
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+    restart: always
+
+  gostarter:
+    image: gostarter
+    container_name: gostarter
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+    restart: always
+
+  gostarter_db:
+    image: "postgres:13"
+    container_name: gostarter_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: gostarter
+      POSTGRES_PASSWORD: gostarter
+      POSTGRES_DB: gostarter
+    volumes:
+      - ./platform/volumes/postgres-data:/var/lib/postgresql/data
+    restart: always
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: gostarter_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - ./platform/volumes/rabbitmq-data:/var/lib/rabbitmq
+    restart: always
+
+  # Observability stack
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gostarter_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./platform/volumes/grafana-data:/var/lib/grafana
+    depends_on:
+      - tempo
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: gostarter_tempo
+    ports:
+      - "3200:3200"   # HTTP query port for Grafana integration
+      - "4317:4317"   # gRPC endpoint for receiving traces
+      - "4318:4318"   # HTTP endpoint for OTLP
+    volumes:
+      - ./platform/volumes/tempo-data:/var/lib/tempo
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/tempo.yaml'
+    configs:
+      - source: tempo_config
+        target: /etc/tempo.yaml
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.78.0
+    container_name: gostarter_otelcollector
+    command:
+      - "--config=/etc/otel-collector-config.yaml"
+    ports:
+      - "4319:4319"   # OTLP HTTP receiver
+      - "8889:8889"   # Prometheus exporter
+    depends_on:
+      - tempo
+      - prometheus
+    configs:
+      - source: otel_collector_config
+        target: /etc/otel-collector-config.yaml
+
+  prometheus:
+    image: "prom/prometheus"
+    container_name: gostarter_prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./platform/volumes/prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    restart: always
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+
+  loki:
+    image: "grafana/loki:latest"
+    container_name: gostarter_loki
+    ports:
+      - 3100:3100
+    volumes:
+        - ./platform/volumes/loki-data:/loki
+    restart: always
+
+  promtail:
+    image: "grafana/promtail:latest"
+    container_name: gostarter_promtail
+    volumes:
+      - ./logs:/logs
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    restart: always
+    configs:
+      - source: promtail_config
+        target: /etc/promtail/promtail-config.yaml
+
+configs:
+  tempo_config:
+    file: platform/observability/tempo/tempo.yaml
+  nginx_config:
+    file: ./platform/nginx/nginx.conf
+  prometheus_config:
+    file: ./platform/observability/prometheus/prometheus.yml
+  otel_collector_config:
+    file: ./platform/observability/otel-collector/otel-collector-config.yaml
+  promtail_config:
+    file: ./platform/observability/promtail/promtail-config.yaml

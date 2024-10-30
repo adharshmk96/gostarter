@@ -1,0 +1,46 @@
+stream_over_http_enabled: true
+
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+        http:
+
+ingester:
+  trace_idle_period: 10s       # The length of time after a trace has not received spans to consider it complete and flush it.
+  max_block_bytes: 1_000_000   # Cut the head block when it hits this size or
+  max_block_duration: 5m       # this much time passes
+
+
+# Configuration block to determine where to store TSDB blocks.
+storage:
+  trace:
+    backend: local                     # Use the local filesystem for block storage. Not recommended for production systems.
+    # Write Ahead Log (WAL) configuration.
+    wal:
+      path: /tmp/tempo/wal             # Directory to store the the WAL locally.
+    # Local configuration for filesystem storage.
+    local:
+      path: /tmp/tempo/blocks          # Directory to store the TSDB blocks.
+    # Pool used for finding trace IDs.
+    pool:
+      max_workers: 100                 # Worker pool determines the number of parallel requests to the object store backend.
+      queue_depth: 10000               # Maximum depth for the querier queue jobs. A job is required for each block searched.
+    block:
+      bloom_filter_false_positive: .05 # Bloom filter false positive rate.  lower values create larger filters but fewer false positives.
+
+# The compactor block configures the compactor responsible for compacting TSDB blocks.
+compactor:
+  compaction:
+    compaction_window: 1h              # Blocks in this time window will be compacted together.
+    max_block_bytes: 100_000_000       # Maximum size of a compacted block.
+    block_retention: 1h                # How long to keep blocks. Default is 14 days, this demo system is short-lived.
+    compacted_block_retention: 10m     # How long to keep compacted blocks stored elsewhere.
+
+# Global override configuration.
+overrides:
+  metrics_generator_processors: ['service-graphs', 'span-metrics','local-blocks'] # The types of metrics generation to enable for each tenant.
