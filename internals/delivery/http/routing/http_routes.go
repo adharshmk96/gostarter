@@ -2,28 +2,26 @@ package routing
 
 import (
 	"github.com/go-chi/chi/v5"
-	"gostarter/infra/config"
+	"gostarter/infra"
 	"gostarter/internals/delivery/http/api"
-	"gostarter/internals/delivery/http/middleware"
 	"gostarter/internals/service"
 	"gostarter/internals/storage/memory"
 )
 
-func SetupRoutes(cfg *config.Config) func(r chi.Router) {
+func SetupRoutes(container *infra.Container) func(r chi.Router) {
+	cfg := container.Cfg
 	return func(r chi.Router) {
 		tokenService := service.NewTokenService(cfg.JWT)
 
-		accountRepo := memory.NewAccountRepository()
-		accountService := service.NewAccountService(accountRepo)
-		accountHandler := api.NewAccountHandler(accountService, tokenService)
+		// Storage
+		accountRepo := memory.NewAccountRepository(container)
 
-		r.Post("/v1/auth/register", accountHandler.Register)
-		r.Post("/v1/auth/login", accountHandler.Login)
+		// Services
+		accountService := service.NewAccountService(container, accountRepo)
 
-		r.Group(func(r chi.Router) {
-			r.Use(middleware.JWTAuthMiddleware(tokenService))
-			r.Post("/v1/auth/logout", accountHandler.Logout)
-			r.Get("/v1/auth/profile", accountHandler.Profile)
-		})
+		// Handlers
+		accountHandler := api.NewAccountHandler(container, accountService, tokenService)
+
+		accountRoutes(r, accountHandler, tokenService)
 	}
 }

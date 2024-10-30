@@ -2,17 +2,25 @@ package service
 
 import (
 	"github.com/adharshmk96/goutils/auth"
+	"go.opentelemetry.io/otel/trace"
+	"gostarter/infra"
+	"log/slog"
 
 	"gostarter/internals/core/utils"
 	"gostarter/internals/domain"
 )
 
 type accountService struct {
+	logger *slog.Logger
+	tracer *trace.Tracer
+
 	accountRepo domain.AccountRepository
 }
 
-func NewAccountService(accountRepo domain.AccountRepository) domain.AccountService {
+func NewAccountService(container *infra.Container, accountRepo domain.AccountRepository) domain.AccountService {
 	return &accountService{
+		logger:      container.Logger,
+		tracer:      container.Tracer,
 		accountRepo: accountRepo,
 	}
 }

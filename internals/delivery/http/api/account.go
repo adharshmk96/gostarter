@@ -2,22 +2,31 @@ package api
 
 import (
 	"encoding/json"
+	"go.opentelemetry.io/otel/trace"
+	"gostarter/infra"
 	"gostarter/infra/config"
 	"gostarter/internals/delivery/http/helpers"
 	"gostarter/internals/domain"
+	"log/slog"
 	"net/http"
 )
 
 type AccountHandler struct {
+	logger *slog.Logger
+	tracer *trace.Tracer
+
 	accountService domain.AccountService
 	tokenService   domain.TokenService
 }
 
 func NewAccountHandler(
+	container *infra.Container,
 	accountService domain.AccountService,
 	tokenService domain.TokenService,
 ) *AccountHandler {
 	return &AccountHandler{
+		logger:         container.Logger,
+		tracer:         container.Tracer,
 		accountService: accountService,
 		tokenService:   tokenService,
 	}

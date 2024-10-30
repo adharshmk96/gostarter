@@ -5,19 +5,16 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
+	"gostarter/infra"
 
 	_ "gostarter/docs"
-	"gostarter/infra/config"
 	"gostarter/internals/delivery/http/routing"
 
 	"context"
-	"log/slog"
 	"net/http"
 )
 
 type HttpServer struct {
-	logger *slog.Logger
-	cfg    *config.Config
 	server *http.Server
 }
 
@@ -29,7 +26,9 @@ func (s *HttpServer) Stop(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }
 
-func NewHttpServer(cfg *config.Config, logger *slog.Logger) *HttpServer {
+func NewHttpServer(container *infra.Container) *HttpServer {
+	cfg := container.Cfg
+
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
@@ -46,7 +45,7 @@ func NewHttpServer(cfg *config.Config, logger *slog.Logger) *HttpServer {
 	})
 
 	// API Routes
-	r.Route("/api", routing.SetupRoutes(cfg))
+	r.Route("/api", routing.SetupRoutes(container))
 
 	// Swagger API docs
 	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
@@ -70,8 +69,6 @@ func NewHttpServer(cfg *config.Config, logger *slog.Logger) *HttpServer {
 	r.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
 
 	return &HttpServer{
-		logger: logger,
-		cfg:    cfg,
 		server: &http.Server{
 			Addr:    ":" + cfg.Server.Port,
 			Handler: r,

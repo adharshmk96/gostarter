@@ -3,11 +3,12 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	Version    string           `mapstructure:"version"`
-	Server     ServerConfig     `mapstructure:"server"`
-	Database   DatabaseConfig   `mapstructure:"database"`
-	JWT        JWTConfig        `mapstructure:"jwt"`
-	Encryption EncryptionConfig `mapstructure:"encryption"`
+	Version       string              `mapstructure:"version"`
+	Server        ServerConfig        `mapstructure:"server"`
+	Database      DatabaseConfig      `mapstructure:"database"`
+	JWT           JWTConfig           `mapstructure:"jwt"`
+	Encryption    EncryptionConfig    `mapstructure:"encryption"`
+	Observability ObservabilityConfig `mapstructure:"observability"`
 }
 
 type ServerConfig struct {
@@ -32,10 +33,11 @@ type JWTConfig struct {
 }
 
 type ObservabilityConfig struct {
-	MeterName      string `mapstructure:"meter_name"`
-	MeterExporter  string `mapstructure:"meter_exporter"`
-	TracerName     string `mapstructure:"tracer_name"`
-	TracerExporter string `mapstructure:"tracer_exporter"`
+	MeterName     string `mapstructure:"meter_name"`
+	TracerName    string `mapstructure:"tracer_name"`
+	MeterExporter string `mapstructure:"meter_exporter"`
+	TraceExporter string `mapstructure:"trace_exporter"`
+	LogExporter   string `mapstructure:"logger_exporter"`
 }
 
 type EncryptionConfig struct {
@@ -58,12 +60,5 @@ func NewConfig() *Config {
 		panic(err)
 	}
 
-	return config
-}
-
-func GetConfig() *Config {
-	if config == nil {
-		config = NewConfig()
-	}
 	return config
 }

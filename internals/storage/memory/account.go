@@ -1,17 +1,24 @@
 package memory
 
 import (
+	"go.opentelemetry.io/otel/trace"
+	"gostarter/infra"
 	"gostarter/internals/core/utils"
 	"gostarter/internals/domain"
+	"log/slog"
 	"time"
 )
 
 type accountRepository struct {
+	logger   *slog.Logger
+	tracer   *trace.Tracer
 	accounts []domain.Account
 }
 
-func NewAccountRepository() domain.AccountRepository {
+func NewAccountRepository(container *infra.Container) domain.AccountRepository {
 	return &accountRepository{
+		logger:   container.Logger,
+		tracer:   container.Tracer,
 		accounts: []domain.Account{},
 	}
 }
