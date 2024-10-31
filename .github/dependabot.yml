@@ -16,9 +16,6 @@ updates:
       - "gomod"
       - "dependabot"
 
-    commit-message:
-      prefix: "update: "
-      
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
