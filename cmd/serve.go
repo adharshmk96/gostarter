@@ -12,6 +12,7 @@ import (
 	"gostarter/infra/logging"
 	"gostarter/infra/observability"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -58,7 +59,7 @@ var serveCmd = &cobra.Command{
 			<-stop
 			logger.Info("shutting down server...")
 			if err := svr.Stop(context.Background()); err != nil {
-				logger.Error("failed to stop server:", err)
+				logger.Error("failed to stop server:", slog.String("error", err.Error()))
 			}
 			done <- true
 		}()
@@ -67,7 +68,7 @@ var serveCmd = &cobra.Command{
 		log.Printf("server starting at port: %s\n", cfg.Server.Port)
 
 		if err := svr.Start(); err != nil {
-			logger.Error("server stopped:", err)
+			logger.Error("server stopped:", slog.String("error", err.Error()))
 		}
 
 		<-done
