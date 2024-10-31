@@ -12,7 +12,7 @@ jwt:
   jwt_expiration_hours: 48
 observability:
   tracer_name: "gostarter"
-  tracer_exporter: "localhost:4318"
+  trace_exporter: "localhost:4318"
   meter_name: "gostarter"
   meter_exporter: "localhost:4319"
 queue:

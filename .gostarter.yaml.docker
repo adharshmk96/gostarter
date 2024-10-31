@@ -12,8 +12,8 @@ jwt:
   jwt_expiration_hours: 48
 observability:
   tracer_name: "gostarter"
-  tracer_exporter: "tempo:4318"
   meter_name: "gostarter"
+  trace_exporter: "tempo:4318"
   meter_exporter: "otel-collector:4319"
 queue:
   url: "amqp://guest:guest@rabbitmq:5672/"
