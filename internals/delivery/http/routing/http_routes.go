@@ -22,6 +22,7 @@ func SetupRoutes(container *infra.Container) func(r chi.Router) {
 		// Handlers
 		accountHandler := api.NewAccountHandler(container, accountService, tokenService)
 
+		// Routes
 		accountRoutes(r, accountHandler, tokenService)
 	}
 }

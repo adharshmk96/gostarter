@@ -13,7 +13,7 @@ import (
 
 type AccountHandler struct {
 	logger *slog.Logger
-	tracer *trace.Tracer
+	tracer trace.Tracer
 
 	accountService domain.AccountService
 	tokenService   domain.TokenService
@@ -53,6 +53,9 @@ type RegisterAccountResponse struct {
 // @Failure 400 {object} helpers.GeneralResponse
 // @Failure 500 {object} helpers.GeneralResponse
 func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
+	ctx, span := a.tracer.Start(r.Context(), "AccountHandler.Register")
+	defer span.End()
+
 	// Parse request
 	req, err := helpers.UnmarshalData[RegisterAccountRequest](r.Body)
 	if err != nil {
@@ -74,7 +77,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Register account
-	err = a.accountService.Register(acc)
+	err = a.accountService.Register(ctx, acc)
 	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "failed to register account",
@@ -135,6 +138,9 @@ type LoginRequest struct {
 // @Failure 400 {object} helpers.GeneralResponse
 // @Failure 500 {object} helpers.GeneralResponse
 func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
+	ctx, span := a.tracer.Start(r.Context(), "AccountHandler.Login")
+	defer span.End()
+
 	// Parse request
 	req, err := helpers.UnmarshalData[LoginRequest](r.Body)
 	if err != nil {
@@ -150,7 +156,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Authenticate account
-	acc, err := a.accountService.Authenticate(req.Username, req.Password)
+	acc, err := a.accountService.Authenticate(ctx, req.Username, req.Password)
 	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "invalid credentials",
@@ -203,7 +209,10 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Success 200 {object} helpers.GeneralResponse
 // @Failure 500 {object} helpers.GeneralResponse
-func (a *AccountHandler) Logout(w http.ResponseWriter, _ *http.Request) {
+func (a *AccountHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	_, span := a.tracer.Start(r.Context(), "AccountHandler.Logout")
+	defer span.End()
+
 	// Set token in http only cookie
 	http.SetCookie(w, &http.Cookie{
 		Path:     "/",
@@ -237,6 +246,9 @@ type ProfileResponse struct {
 // @Success 200 {object} ProfileResponse
 // @Failure 500 {object} helpers.GeneralResponse
 func (a *AccountHandler) Profile(w http.ResponseWriter, r *http.Request) {
+	_, span := a.tracer.Start(r.Context(), "AccountHandler.Profile")
+	defer span.End()
+
 	// Get account from context
 	acc, ok := r.Context().Value("account").(*domain.Account)
 	if !ok {

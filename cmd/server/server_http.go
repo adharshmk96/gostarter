@@ -3,11 +3,13 @@ package server
 import (
 	"github.com/MarceloPetrucio/go-scalar-api-reference"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
-	"gostarter/infra"
 
 	_ "gostarter/docs"
+	"gostarter/infra"
+	custommiddleware "gostarter/internals/delivery/http/middleware"
 	"gostarter/internals/delivery/http/routing"
 
 	"context"
@@ -31,12 +33,19 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 
 	r := chi.NewRouter()
 
+	// Middlewares
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Throttle(12000))
+
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
 	}))
+
+	r.Use(custommiddleware.NewLatencyMiddleware(container.Meter))
 
 	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -45,7 +54,7 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 	})
 
 	// API Routes
-	r.Route("/api", routing.SetupRoutes(container))
+	r.Route("/api/v1", routing.SetupRoutes(container))
 
 	// Swagger API docs
 	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {

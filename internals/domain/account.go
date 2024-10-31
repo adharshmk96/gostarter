@@ -1,9 +1,11 @@
 package domain
 
 import (
+	"context"
 	"errors"
-	"gostarter/internals/core/utils"
+	"gostarter/pkg/utils"
 	"net/http"
+	"time"
 )
 
 type Account struct {
@@ -15,8 +17,8 @@ type Account struct {
 
 	Roles []string `json:"roles"`
 
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type AccountHandler interface {
@@ -28,16 +30,16 @@ type AccountHandler interface {
 }
 
 type AccountService interface {
-	Register(account *Account) error
-	Authenticate(email, password string) (*Account, error)
+	Register(ctx context.Context, account *Account) error
+	Authenticate(ctx context.Context, email, password string) (*Account, error)
 
-	GetAccountByID(id int) (*Account, error)
-	GetAccountByEmail(email string) (*Account, error)
-	GetAccountByUsername(username string) (*Account, error)
-	UpdateAccount(account *Account) error
-	DeleteAccount(id int) error
+	GetAccountByID(ctx context.Context, id int) (*Account, error)
+	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
+	GetAccountByUsername(ctx context.Context, username string) (*Account, error)
+	UpdateAccount(ctx context.Context, account *Account) error
+	DeleteAccount(ctx context.Context, id int) error
 
-	ListAccounts(utils.PaginationParams) ([]*Account, error)
+	ListAccounts(context.Context, utils.PaginationParams) ([]*Account, error)
 }
 
 type TokenService interface {
@@ -52,14 +54,14 @@ var (
 )
 
 type AccountRepository interface {
-	CreateAccount(account *Account) error
-	GetAccountByID(id int) (*Account, error)
-	GetAccountByEmail(email string) (*Account, error)
-	GetAccountByUsername(username string) (*Account, error)
-	UpdateAccount(account *Account) error
-	DeleteAccount(id int) error
+	CreateAccount(ctx context.Context, account *Account) error
+	GetAccountByID(ctx context.Context, id int) (*Account, error)
+	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
+	GetAccountByUsername(ctx context.Context, username string) (*Account, error)
+	UpdateAccount(ctx context.Context, account *Account) error
+	DeleteAccount(ctx context.Context, id int) error
 
-	ListAccounts(utils.PaginationParams) ([]*Account, error)
+	ListAccounts(context.Context, utils.PaginationParams) ([]*Account, error)
 }
 
 // Errors

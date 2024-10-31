@@ -4,8 +4,8 @@ import (
 	"github.com/adharshmk96/goutils/token"
 	"github.com/golang-jwt/jwt/v5"
 	"gostarter/infra/config"
-	"gostarter/internals/core/utils"
 	"gostarter/internals/domain"
+	"gostarter/pkg/utils"
 	"time"
 )
 

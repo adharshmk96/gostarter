@@ -1,17 +1,18 @@
 package memory
 
 import (
+	"context"
 	"go.opentelemetry.io/otel/trace"
 	"gostarter/infra"
-	"gostarter/internals/core/utils"
 	"gostarter/internals/domain"
+	"gostarter/pkg/utils"
 	"log/slog"
 	"time"
 )
 
 type accountRepository struct {
 	logger   *slog.Logger
-	tracer   *trace.Tracer
+	tracer   trace.Tracer
 	accounts []domain.Account
 }
 
@@ -23,12 +24,15 @@ func NewAccountRepository(container *infra.Container) domain.AccountRepository {
 	}
 }
 
-func (a *accountRepository) CreateAccount(account *domain.Account) error {
+func (a *accountRepository) CreateAccount(ctx context.Context, account *domain.Account) error {
+	_, span := a.tracer.Start(ctx, "AccountRepository.CreateAccount")
+	defer span.End()
+
 	id := len(a.accounts) + 1
 	account.ID = id
 	now := time.Now()
-	account.CreatedAt = now.Format(time.RFC3339)
-	account.UpdatedAt = now.Format(time.RFC3339)
+	account.CreatedAt = now
+	account.UpdatedAt = now
 
 	if account.Username == "" {
 		account.Username = account.Email
@@ -39,7 +43,10 @@ func (a *accountRepository) CreateAccount(account *domain.Account) error {
 	return nil
 }
 
-func (a *accountRepository) GetAccountByID(id int) (*domain.Account, error) {
+func (a *accountRepository) GetAccountByID(ctx context.Context, id int) (*domain.Account, error) {
+	_, span := a.tracer.Start(ctx, "AccountRepository.GetAccountByID")
+	defer span.End()
+
 	var account *domain.Account
 
 	for _, acc := range a.accounts {
@@ -56,7 +63,10 @@ func (a *accountRepository) GetAccountByID(id int) (*domain.Account, error) {
 	return account, nil
 }
 
-func (a *accountRepository) GetAccountByEmail(email string) (*domain.Account, error) {
+func (a *accountRepository) GetAccountByEmail(ctx context.Context, email string) (*domain.Account, error) {
+	_, span := a.tracer.Start(ctx, "AccountRepository.GetAccountByEmail")
+	defer span.End()
+
 	var account domain.Account
 
 	for _, acc := range a.accounts {
@@ -73,7 +83,10 @@ func (a *accountRepository) GetAccountByEmail(email string) (*domain.Account, er
 	return &account, nil
 }
 
-func (a *accountRepository) GetAccountByUsername(username string) (*domain.Account, error) {
+func (a *accountRepository) GetAccountByUsername(ctx context.Context, username string) (*domain.Account, error) {
+	_, span := a.tracer.Start(ctx, "AccountRepository.GetAccountByUsername")
+	defer span.End()
+
 	var account domain.Account
 
 	for _, acc := range a.accounts {
@@ -90,7 +103,10 @@ func (a *accountRepository) GetAccountByUsername(username string) (*domain.Accou
 	return &account, nil
 }
 
-func (a *accountRepository) UpdateAccount(account *domain.Account) error {
+func (a *accountRepository) UpdateAccount(ctx context.Context, account *domain.Account) error {
+	_, span := a.tracer.Start(ctx, "AccountRepository.UpdateAccount")
+	defer span.End()
+
 	var updatedAccount *domain.Account
 
 	for i, acc := range a.accounts {
@@ -108,7 +124,10 @@ func (a *accountRepository) UpdateAccount(account *domain.Account) error {
 	return nil
 }
 
-func (a *accountRepository) DeleteAccount(id int) error {
+func (a *accountRepository) DeleteAccount(ctx context.Context, id int) error {
+	_, span := a.tracer.Start(ctx, "AccountRepository.DeleteAccount")
+	defer span.End()
+
 	var deletedAccount *domain.Account
 
 	for i, acc := range a.accounts {
@@ -126,7 +145,10 @@ func (a *accountRepository) DeleteAccount(id int) error {
 	return nil
 }
 
-func (a *accountRepository) ListAccounts(pageParams utils.PaginationParams) ([]*domain.Account, error) {
+func (a *accountRepository) ListAccounts(ctx context.Context, pageParams utils.PaginationParams) ([]*domain.Account, error) {
+	_, span := a.tracer.Start(ctx, "AccountRepository.ListAccounts")
+	defer span.End()
+
 	offset := pageParams.GetOffset()
 
 	if offset >= len(a.accounts) {

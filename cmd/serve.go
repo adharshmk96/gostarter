@@ -44,8 +44,8 @@ var serveCmd = &cobra.Command{
 		container := &infra.Container{
 			Cfg:    cfg,
 			Logger: logger,
-			Tracer: &tracer,
-			Meter:  &meter,
+			Tracer: tracer,
+			Meter:  meter,
 		}
 
 		svr := server.NewHttpServer(container)

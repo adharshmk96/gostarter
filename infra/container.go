@@ -10,6 +10,6 @@ import (
 type Container struct {
 	Cfg    *config.Config
 	Logger *slog.Logger
-	Tracer *trace.Tracer
-	Meter  *metric.Meter
+	Tracer trace.Tracer
+	Meter  metric.Meter
 }
