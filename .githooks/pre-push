@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo "running pre-push hook..."
+# Run swag init to generate Swagger documentation
+swag init
+
+# Check if there are any changes in the docs directory
+if [ -n "$(git status docs --porcelain)" ]; then
+  echo "swagger docs updated, committing the changes"
+  # Add the changes to the staging area
+  git add docs
+
+  # Commit the changes with a message
+  git commit -m "swagger docs updated"
+fi

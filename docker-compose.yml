@@ -34,7 +34,7 @@ services:
       POSTGRES_PASSWORD: gostarter
       POSTGRES_DB: gostarter
     volumes:
-      - ./platform/volumes/postgres-data:/var/lib/postgresql/data
+      - ./volumes/postgres-data:/var/lib/postgresql/data
     restart: always
 
   rabbitmq:
@@ -47,7 +47,7 @@ services:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     volumes:
-      - ./platform/volumes/rabbitmq-data:/var/lib/rabbitmq
+      - ./volumes/rabbitmq-data:/var/lib/rabbitmq
     restart: always
 
   # Observability stack
@@ -59,7 +59,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
-      - ./platform/volumes/grafana-data:/var/lib/grafana
+      - ./volumes/grafana-data:/var/lib/grafana
     depends_on:
       - tempo
     restart: unless-stopped
@@ -72,7 +72,7 @@ services:
       - "4317:4317"   # gRPC endpoint for receiving traces
       - "4318:4318"   # HTTP endpoint for OTLP
     volumes:
-      - ./platform/volumes/tempo-data:/var/lib/tempo
+      - ./volumes/tempo-data:/var/lib/tempo
     restart: unless-stopped
     command:
       - '--config.file=/etc/tempo.yaml'
@@ -101,7 +101,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./platform/volumes/prometheus-data:/prometheus
+      - ./volumes/prometheus-data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -116,7 +116,7 @@ services:
     ports:
       - 3100:3100
     volumes:
-        - ./platform/volumes/loki-data:/loki
+        - ./volumes/loki-data:/loki
     restart: always
 
   promtail:

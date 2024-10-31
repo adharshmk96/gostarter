@@ -18,12 +18,21 @@ definitions:
       username:
         type: string
     type: object
+  api.RegisterAccountRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   api.RegisterAccountResponse:
     properties:
       message:
         type: string
     type: object
-  common.GeneralResponse:
+  helpers.GeneralResponse:
     properties:
       errors:
         items:
@@ -56,15 +65,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
       summary: Login an account
       tags:
       - Account
@@ -79,11 +88,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
       summary: Logout an account
       tags:
       - Account
@@ -102,7 +111,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
       summary: Get account profile
       tags:
       - Account
@@ -112,24 +121,12 @@ paths:
       - application/json
       description: Register a new account
       parameters:
-      - description: Username
+      - description: Account to register
         in: body
-        name: Username
+        name: account
         required: true
         schema:
-          type: string
-      - description: Email
-        in: body
-        name: Email
-        required: true
-        schema:
-          type: string
-      - description: Password
-        in: body
-        name: Password
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/api.RegisterAccountRequest'
       produces:
       - application/json
       responses:
@@ -140,11 +137,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/common.GeneralResponse'
+            $ref: '#/definitions/helpers.GeneralResponse'
       summary: Register a new account
       tags:
       - Account

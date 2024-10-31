@@ -36,19 +36,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     }
                 }
@@ -71,13 +71,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     }
                 }
@@ -106,7 +106,7 @@
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     }
                 }
@@ -127,30 +127,12 @@
                 "summary": "Register a new account",
                 "parameters": [
                     {
-                        "description": "Username",
-                        "name": "Username",
+                        "description": "Account to register",
+                        "name": "account",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Email",
-                        "name": "Email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Password",
-                        "name": "Password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.RegisterAccountRequest"
                         }
                     }
                 ],
@@ -164,13 +146,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/common.GeneralResponse"
+                            "$ref": "#/definitions/helpers.GeneralResponse"
                         }
                     }
                 }
@@ -206,6 +188,20 @@
                 }
             }
         },
+        "api.RegisterAccountRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "api.RegisterAccountResponse": {
             "type": "object",
             "properties": {
@@ -214,7 +210,7 @@
                 }
             }
         },
-        "common.GeneralResponse": {
+        "helpers.GeneralResponse": {
             "type": "object",
             "properties": {
                 "errors": {

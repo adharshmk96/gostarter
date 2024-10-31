@@ -134,30 +134,12 @@ const docTemplate = `{
                 "summary": "Register a new account",
                 "parameters": [
                     {
-                        "description": "Username",
-                        "name": "Username",
+                        "description": "Account to register",
+                        "name": "account",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Email",
-                        "name": "Email",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Password",
-                        "name": "Password",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.RegisterAccountRequest"
                         }
                     }
                 ],
@@ -207,6 +189,20 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.RegisterAccountRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string"

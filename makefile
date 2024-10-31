@@ -12,7 +12,10 @@ logdir:
 configfile:
 	cp .gostarter.yaml.example .gostarter.yaml
 
-init: keys logdir configfile swagger
+githook:
+	git config core.hooksPath .githooks
+
+init: keys logdir configfile swagger githook
 	go mod tidy
 
 clean:
@@ -24,14 +27,13 @@ clean:
 
 install:
 	go install github.com/spf13/cobra-cli@latest
-	go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
 	go install github.com/air-verse/air@latest
 
 # Code Generation
 
 migration:
-	migrate create -ext sql -dir platform/tools/migration -seq $(name)
+	go run . migrate create -d platform/migration -n $(name)
 
 migrateup:
 	go run main.go migrate up

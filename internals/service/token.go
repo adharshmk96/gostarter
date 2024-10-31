@@ -12,6 +12,7 @@ import (
 type tokenService struct {
 	privateKeyPath string
 	publicKeyPath  string
+	tokenExpiry    int
 }
 
 func (a *tokenService) GenerateJWT(id int, username string, roles []string) (string, error) {
@@ -23,7 +24,7 @@ func (a *tokenService) GenerateJWT(id int, username string, roles []string) (str
 		"userId":   id,
 		"username": username,
 		"roles":    roles,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(),
+		"exp":      time.Now().Add(time.Hour * time.Duration(a.tokenExpiry)).Unix(),
 	}
 
 	privateKey, publicKey, err := utils.LoadECDSAKeyPair(a.privateKeyPath, a.publicKeyPath)
@@ -115,5 +116,6 @@ func NewTokenService(cfg config.JWTConfig) domain.TokenService {
 	return &tokenService{
 		privateKeyPath: cfg.PrivateKeyPath,
 		publicKeyPath:  cfg.PublicKeyPath,
+		tokenExpiry:    cfg.ExpirationHours,
 	}
 }
