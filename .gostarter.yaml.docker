@@ -17,3 +17,8 @@ observability:
   meter_exporter: "otel-collector:4319"
 queue:
   url: "amqp://guest:guest@rabbitmq:5672/"
+ vault:
+   url: "http://vault:8200"
+   token: "root"
+ consul:
+   url: "http://consul:8500"

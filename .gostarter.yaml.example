@@ -17,3 +17,8 @@ observability:
   meter_exporter: "localhost:4319"
 queue:
   url: "amqp://guest:guest@localhost:5672/"
+vault:
+  url: "http://localhost:8200"
+  token: "root"
+consul:
+  url: "http://localhost:8500"Î

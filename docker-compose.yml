@@ -24,6 +24,28 @@ services:
       - ./logs:/app/logs
     restart: always
 
+  consul:
+    image: consul:latest
+    container_name: gostarter_consul
+    ports:
+      - "8500:8500"
+    restart: always
+  vault:
+    image: vault:latest
+    container_name: gostarter_vault
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      test: [ "CMD", "vault", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
   gostarter_db:
     image: "postgres:13"
     container_name: gostarter_db
@@ -116,7 +138,7 @@ services:
     ports:
       - 3100:3100
     volumes:
-        - ./volumes/loki-data:/loki
+      - ./volumes/loki-data:/loki
     restart: always
 
   promtail:

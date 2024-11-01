@@ -9,6 +9,8 @@ type Config struct {
 	JWT           JWTConfig           `mapstructure:"jwt"`
 	Encryption    EncryptionConfig    `mapstructure:"encryption"`
 	Observability ObservabilityConfig `mapstructure:"observability"`
+	Vault         VaultConfig         `mapstructure:"vault"`
+	Consul        ConsulConfig        `mapstructure:"consul"`
 }
 
 type ServerConfig struct {
@@ -42,6 +44,15 @@ type ObservabilityConfig struct {
 
 type EncryptionConfig struct {
 	Key string `mapstructure:"key"`
+}
+
+type VaultConfig struct {
+	Url   string `mapstructure:"url"`
+	Token string `mapstructure:"token"`
+}
+
+type ConsulConfig struct {
+	Url string `mapstructure:"url"`
 }
 
 var config *Config
