@@ -3,16 +3,14 @@ package service
 import (
 	"github.com/adharshmk96/goutils/token"
 	"github.com/golang-jwt/jwt/v5"
-	"gostarter/infra/config"
 	"gostarter/internals/domain"
 	"gostarter/pkg/utils"
 	"time"
 )
 
 type tokenService struct {
-	privateKeyPath string
-	publicKeyPath  string
-	tokenExpiry    int
+	tokenExpiry int
+	jwtUtil     *token.JWTUtil
 }
 
 func (a *tokenService) GenerateJWT(id int, username string, roles []string) (string, error) {
@@ -27,31 +25,11 @@ func (a *tokenService) GenerateJWT(id int, username string, roles []string) (str
 		"exp":      time.Now().Add(time.Hour * time.Duration(a.tokenExpiry)).Unix(),
 	}
 
-	privateKey, publicKey, err := utils.LoadECDSAKeyPair(a.privateKeyPath, a.publicKeyPath)
-	if err != nil {
-		return "", domain.ErrLoadingKey
-	}
-
-	jwtUtil := token.NewJwtUtil(token.JWTConfig{
-		PrivateKey: privateKey,
-		PublicKey:  publicKey,
-	})
-
-	return jwtUtil.EncodeJWT(claims)
+	return a.jwtUtil.EncodeJWT(claims)
 }
 
 func (a *tokenService) VerifyJWT(userJWT string) (bool, error) {
-	privateKey, publicKey, err := utils.LoadECDSAKeyPair(a.privateKeyPath, a.publicKeyPath)
-	if err != nil {
-		return false, domain.ErrLoadingKey
-	}
-
-	jwtUtil := token.NewJwtUtil(token.JWTConfig{
-		PrivateKey: privateKey,
-		PublicKey:  publicKey,
-	})
-
-	_, err = jwtUtil.DecodeJWT(userJWT)
+	_, err := a.jwtUtil.DecodeJWT(userJWT)
 	if err != nil {
 		return false, err
 	}
@@ -74,17 +52,7 @@ func getList[T any](key string, decodedJwt *jwt.Token) ([]T, bool) {
 }
 
 func (a *tokenService) ExtractAccount(userJWT string) (*domain.Account, error) {
-	privateKey, publicKey, err := utils.LoadECDSAKeyPair(a.privateKeyPath, a.publicKeyPath)
-	if err != nil {
-		return nil, domain.ErrLoadingKey
-	}
-
-	jwtUtil := token.NewJwtUtil(token.JWTConfig{
-		PrivateKey: privateKey,
-		PublicKey:  publicKey,
-	})
-
-	decodedJwt, err := jwtUtil.DecodeJWT(userJWT)
+	decodedJwt, err := a.jwtUtil.DecodeJWT(userJWT)
 	if err != nil {
 		return nil, err
 	}
@@ -112,10 +80,20 @@ func (a *tokenService) ExtractAccount(userJWT string) (*domain.Account, error) {
 	return userAccount, nil
 }
 
-func NewTokenService(cfg config.JWTConfig) domain.TokenService {
-	return &tokenService{
-		privateKeyPath: cfg.PrivateKeyPath,
-		publicKeyPath:  cfg.PublicKeyPath,
-		tokenExpiry:    cfg.ExpirationHours,
+func NewTokenService(privateKeyPath, publicKeyPath string, expiry int) (domain.TokenService, error) {
+
+	privateKey, publicKey, err := utils.LoadECDSAKeyPair(privateKeyPath, publicKeyPath)
+	if err != nil {
+		return nil, domain.ErrLoadingKey
 	}
+
+	jwtUtil := token.NewJwtUtil(token.JWTConfig{
+		PrivateKey: privateKey,
+		PublicKey:  publicKey,
+	})
+
+	return &tokenService{
+		tokenExpiry: expiry,
+		jwtUtil:     jwtUtil,
+	}, nil
 }

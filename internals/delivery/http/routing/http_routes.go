@@ -11,7 +11,10 @@ import (
 func SetupRoutes(container *infra.Container) func(r chi.Router) {
 	cfg := container.Cfg
 	return func(r chi.Router) {
-		tokenService := service.NewTokenService(cfg.JWT)
+		tokenService, err := service.NewTokenService(cfg.JWT.PrivateKeyPath, cfg.JWT.PublicKeyPath, cfg.JWT.ExpirationHours)
+		if err != nil {
+			panic(err)
+		}
 
 		// Storage
 		accountRepo := memory.NewAccountRepository(container)
