@@ -29,6 +29,10 @@ type AccountHandler interface {
 	ChangePassword(w http.ResponseWriter, r *http.Request)
 }
 
+var (
+	ErrGettingAccountInfo = errors.New("error getting account info")
+)
+
 type AccountService interface {
 	Register(ctx context.Context, account *Account) error
 	Authenticate(ctx context.Context, email, password string) (*Account, error)

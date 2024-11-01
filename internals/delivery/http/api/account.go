@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"go.opentelemetry.io/otel/trace"
 	"gostarter/infra"
 	"gostarter/infra/config"
@@ -24,8 +23,9 @@ func NewAccountHandler(
 	accountService domain.AccountService,
 	tokenService domain.TokenService,
 ) *AccountHandler {
+	logger := container.Logger.With("path", "AccountHandler")
 	return &AccountHandler{
-		logger:         container.Logger,
+		logger:         logger,
 		tracer:         container.Tracer,
 		accountService: accountService,
 		tokenService:   tokenService,
@@ -57,7 +57,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	// Parse request
-	req, err := helpers.UnmarshalData[RegisterAccountRequest](r.Body)
+	req, err := helpers.ParseRequest[RegisterAccountRequest](r.Body)
 	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "invalid request",
@@ -65,8 +65,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 				err.Error(),
 			},
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(errorResponse)
+		_ = helpers.WriteResponse(w, http.StatusBadRequest, errorResponse)
 		return
 	}
 
@@ -85,8 +84,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 				err.Error(),
 			},
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(errorResponse)
+		_ = helpers.WriteResponse(w, http.StatusInternalServerError, errorResponse)
 		return
 	}
 
@@ -99,8 +97,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 				err.Error(),
 			},
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(errorResponse)
+		_ = helpers.WriteResponse(w, http.StatusInternalServerError, errorResponse)
 		return
 	}
 
@@ -118,8 +115,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Message: "account registered successfully",
 	}
 
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(resp)
+	_ = helpers.WriteResponse(w, http.StatusOK, resp)
 }
 
 type LoginRequest struct {
@@ -142,7 +138,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	// Parse request
-	req, err := helpers.UnmarshalData[LoginRequest](r.Body)
+	req, err := helpers.ParseRequest[LoginRequest](r.Body)
 	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "invalid request",
@@ -150,8 +146,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 				err.Error(),
 			},
 		}
-		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(errorResponse)
+		_ = helpers.WriteResponse(w, http.StatusBadRequest, errorResponse)
 		return
 	}
 
@@ -164,8 +159,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 				err.Error(),
 			},
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(errorResponse)
+		_ = helpers.WriteResponse(w, http.StatusInternalServerError, errorResponse)
 		return
 	}
 
@@ -178,8 +172,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 				err.Error(),
 			},
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(errorResponse)
+		_ = helpers.WriteResponse(w, http.StatusInternalServerError, errorResponse)
 		return
 	}
 
@@ -197,8 +190,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Message: "login successful",
 	}
 
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(resp)
+	_ = helpers.WriteResponse(w, http.StatusOK, resp)
 }
 
 // @Router /v1/auth/logout [post]
@@ -227,8 +219,7 @@ func (a *AccountHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		Message: "logout successful",
 	}
 
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(resp)
+	_ = helpers.WriteResponse(w, http.StatusOK, resp)
 }
 
 type ProfileResponse struct {
@@ -250,16 +241,15 @@ func (a *AccountHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	defer span.End()
 
 	// Get account from context
-	acc, ok := r.Context().Value("account").(*domain.Account)
-	if !ok {
+	acc, err := helpers.GetAccountFromContext(r.Context())
+	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "invalid account",
 			Errors: []string{
 				"account not found",
 			},
 		}
-		w.WriteHeader(http.StatusInternalServerError)
-		_ = json.NewEncoder(w).Encode(errorResponse)
+		_ = helpers.WriteResponse(w, http.StatusInternalServerError, errorResponse)
 		return
 	}
 
@@ -270,6 +260,5 @@ func (a *AccountHandler) Profile(w http.ResponseWriter, r *http.Request) {
 		Roles:    acc.Roles,
 	}
 
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(resp)
+	_ = helpers.WriteResponse(w, http.StatusOK, resp)
 }

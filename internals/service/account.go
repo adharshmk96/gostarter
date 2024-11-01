@@ -19,8 +19,9 @@ type accountService struct {
 }
 
 func NewAccountService(container *infra.Container, accountRepo domain.AccountRepository) domain.AccountService {
+	logger := container.Logger.With("path", "accountService")
 	return &accountService{
-		logger:      container.Logger,
+		logger:      logger,
 		tracer:      container.Tracer,
 		accountRepo: accountRepo,
 	}
@@ -44,7 +45,7 @@ func (a *accountService) Authenticate(ctx context.Context, email, password strin
 	ctx, span := a.tracer.Start(ctx, "AccountService.Authenticate")
 	defer span.End()
 
-	account, err := a.accountRepo.GetAccountByEmail(nil, email)
+	account, err := a.accountRepo.GetAccountByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
+	"strings"
 
 	_ "gostarter/docs"
 	"gostarter/infra"
@@ -46,6 +47,7 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 	}))
 
 	r.Use(custommiddleware.NewLatencyMiddleware(container.Meter))
+	r.Use(custommiddleware.NewCounterMiddleware(container.Meter))
 
 	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -56,11 +58,13 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 	// API Routes
 	r.Route("/api/v1", routing.SetupRoutes(container))
 
+	baseUrl := "http://" + strings.TrimPrefix(cfg.Server.BaseURL, "http://")
+
 	// Swagger API docs
 	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
 		htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
 			// SpecURL: "https://generator3.swagger.io/openapi.json",// allow external URL or local path file
-			SpecURL: "http://" + cfg.Server.BaseURL + "/swagger/doc.json",
+			SpecURL: baseUrl + "/swagger/doc.json",
 			CustomOptions: scalar.CustomOptions{
 				PageTitle: "gostarter API",
 			},

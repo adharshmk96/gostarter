@@ -39,6 +39,9 @@ services:
     depends_on:
       - tempo
     restart: unless-stopped
+    configs:
+      - source: grafana_datasources
+        target: /etc/grafana/provisioning/datasources/datasources.yaml
 
   tempo:
     image: grafana/tempo:latest
@@ -92,7 +95,7 @@ services:
     ports:
       - 3100:3100
     volumes:
-        - ./volumes/loki-data:/loki
+      - ./volumes/loki-data:/loki
     restart: always
 
   promtail:
@@ -117,3 +120,5 @@ configs:
     file: platform/configs/observability/otel-collector/otel-collector-config.yaml
   promtail_config:
     file: platform/configs/observability/promtail/promtail-config.yaml
+  grafana_datasources:
+    file: platform/configs/observability/grafana/datasources.yaml

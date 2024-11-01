@@ -17,8 +17,9 @@ type accountRepository struct {
 }
 
 func NewAccountRepository(container *infra.Container) domain.AccountRepository {
+	logger := container.Logger.With("path", "accountRepository")
 	return &accountRepository{
-		logger:   container.Logger,
+		logger:   logger,
 		tracer:   container.Tracer,
 		accounts: []domain.Account{},
 	}
