@@ -3,21 +3,18 @@ package service
 import (
 	"github.com/adharshmk96/goutils/token"
 	"github.com/golang-jwt/jwt/v5"
+	"gostarter/infra/config"
 	"gostarter/internals/domain"
 	"gostarter/pkg/utils"
 	"time"
 )
 
 type tokenService struct {
-	tokenExpiry int
 	jwtUtil     *token.JWTUtil
+	tokenExpiry int
 }
 
 func (a *tokenService) GenerateJWT(id int, username string, roles []string) (string, error) {
-	if len(roles) == 0 {
-		roles = append(roles, "user")
-	}
-
 	claims := jwt.MapClaims{
 		"userId":   id,
 		"username": username,
@@ -80,11 +77,11 @@ func (a *tokenService) ExtractAccount(userJWT string) (*domain.Account, error) {
 	return userAccount, nil
 }
 
-func NewTokenService(privateKeyPath, publicKeyPath string, expiry int) (domain.TokenService, error) {
+func NewTokenService(cfg config.JWTConfig) domain.TokenService {
 
-	privateKey, publicKey, err := utils.LoadECDSAKeyPair(privateKeyPath, publicKeyPath)
+	privateKey, publicKey, err := utils.LoadECDSAKeyPair(cfg.PrivateKeyPath, cfg.PublicKeyPath)
 	if err != nil {
-		return nil, domain.ErrLoadingKey
+		panic(err)
 	}
 
 	jwtUtil := token.NewJwtUtil(token.JWTConfig{
@@ -93,7 +90,7 @@ func NewTokenService(privateKeyPath, publicKeyPath string, expiry int) (domain.T
 	})
 
 	return &tokenService{
-		tokenExpiry: expiry,
 		jwtUtil:     jwtUtil,
-	}, nil
+		tokenExpiry: cfg.ExpirationHours,
+	}
 }

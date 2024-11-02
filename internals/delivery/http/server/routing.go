@@ -6,30 +6,18 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
-	"strings"
-
-	_ "gostarter/docs"
 	"gostarter/infra"
 	custommiddleware "gostarter/internals/delivery/http/middleware"
-	"gostarter/internals/delivery/http/routing"
-
-	"context"
+	"gostarter/internals/domain"
 	"net/http"
+	"strings"
 )
 
-type HttpServer struct {
-	server *http.Server
-}
-
-func (s *HttpServer) Start() error {
-	return s.server.ListenAndServe()
-}
-
-func (s *HttpServer) Stop(ctx context.Context) error {
-	return s.server.Shutdown(ctx)
-}
-
-func NewHttpServer(container *infra.Container) *HttpServer {
+func SetupRoutes(
+	container *infra.Container,
+	tokenService domain.TokenService,
+	accountHandler domain.AccountHandler,
+) *chi.Mux {
 	cfg := container.Cfg
 
 	r := chi.NewRouter()
@@ -56,7 +44,10 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 	})
 
 	// API Routes
-	r.Route("/api/v1", routing.SetupRoutes(container))
+	r.Route("/api/v1", func(r chi.Router) {
+		// Routes
+		accountRoutes(r, accountHandler, tokenService)
+	})
 
 	baseUrl := "http://" + strings.TrimPrefix(cfg.Server.BaseURL, "http://")
 
@@ -81,10 +72,17 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 	})
 	r.HandleFunc("/swagger/*", httpSwagger.WrapHandler)
 
-	return &HttpServer{
-		server: &http.Server{
-			Addr:    ":" + cfg.Server.Port,
-			Handler: r,
-		},
-	}
+	return r
+
+}
+
+func accountRoutes(r chi.Router, accountHandler domain.AccountHandler, tokenService domain.TokenService) {
+	r.Post("/auth/register", accountHandler.Register)
+	r.Post("/auth/login", accountHandler.Login)
+
+	r.Group(func(r chi.Router) {
+		r.Use(custommiddleware.JWTAuthMiddleware(tokenService))
+		r.Post("/auth/logout", accountHandler.Logout)
+		r.Get("/auth/profile", accountHandler.Profile)
+	})
 }

@@ -11,6 +11,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"gostarter/infra/config"
+	"log"
 	"time"
 )
 
@@ -38,16 +39,20 @@ func (o *telemetryService) Stop() {
 	_ = o.mp.Shutdown(context.Background())
 }
 
-func NewTelemetryService(cfg *config.ObservabilityConfig) (TelemetryService, error) {
+func NewTelemetryService(cfg *config.ObservabilityConfig) TelemetryService {
 	tp, err := newTracerProvider(cfg)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
+
+	log.Println("tracer provider initialized. at: ", cfg.TraceExporter)
 
 	mp, err := newMeterProvider(cfg)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
+
+	log.Println("meter provider initialized. at: ", cfg.MeterExporter)
 
 	//tracer := tp.Tracer(cfg.TracerName)
 	//meter := mp.Meter(cfg.MeterName)
@@ -58,7 +63,7 @@ func NewTelemetryService(cfg *config.ObservabilityConfig) (TelemetryService, err
 		mp: mp,
 	}
 
-	return ts, nil
+	return ts
 }
 
 func newResource() *resource.Resource {

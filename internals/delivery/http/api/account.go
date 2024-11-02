@@ -22,7 +22,7 @@ func NewAccountHandler(
 	container *infra.Container,
 	accountService domain.AccountService,
 	tokenService domain.TokenService,
-) *AccountHandler {
+) domain.AccountHandler {
 	logger := container.Logger.With("path", "AccountHandler")
 	return &AccountHandler{
 		logger:         logger,

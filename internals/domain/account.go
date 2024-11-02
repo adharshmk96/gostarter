@@ -26,7 +26,7 @@ type AccountHandler interface {
 	Login(w http.ResponseWriter, r *http.Request)
 	Logout(w http.ResponseWriter, r *http.Request)
 	Profile(w http.ResponseWriter, r *http.Request)
-	ChangePassword(w http.ResponseWriter, r *http.Request)
+	//ChangePassword(w http.ResponseWriter, r *http.Request)
 }
 
 var (

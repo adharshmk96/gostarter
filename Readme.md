@@ -24,4 +24,12 @@ passed down to the services that need it.
 
 Note: These services are more specific, not necessarily global.
 
+Internal
 
+- domain: Business logic, entities, value objects, etc.
+- service: Business logic, use cases, etc.
+- storage: Database logic, migrations, etc.
+- delivery: Http, Worker, etc.
+    - http: Http handlers, middlewares, etc.
+        - server: Server Framework, Router handlers, etc.
+    - worker: Worker handlers, etc.

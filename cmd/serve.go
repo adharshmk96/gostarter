@@ -6,11 +6,12 @@ package cmd
 import (
 	"context"
 	"github.com/spf13/cobra"
-	"gostarter/cmd/server"
 	"gostarter/infra"
 	"gostarter/infra/config"
 	"gostarter/infra/logging"
 	"gostarter/infra/observability"
+	"gostarter/infra/pgdatabase"
+	"gostarter/internals/delivery/http/server"
 	"log"
 	"log/slog"
 	"os"
@@ -25,25 +26,19 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.NewConfig()
 
-		logger, err := logging.NewFileLogger("logs/app.log")
-		if err != nil {
-			log.Fatal("failed to initialize logger...", err)
-			return
-		}
+		logger := logging.NewFileLogger("logs/app.log")
 
-		telemetry, err := observability.NewTelemetryService(&cfg.Observability)
-		if err != nil {
-			log.Fatal("failed to initialize telemetry...", err)
-			return
-		}
+		telemetry := observability.NewTelemetryService(&cfg.Observability)
 		defer telemetry.Stop()
-
 		// Tracers can be separated for modules in the future if needed
 		tracer := telemetry.GetTracerProvider().Tracer(cfg.Observability.TracerName)
 		meter := telemetry.GetMeterProvider().Meter(cfg.Observability.MeterName)
 
+		sqlConn := pgdatabase.NewConnection(cfg.Database.Postgres.Connection)
+
 		container := &infra.Container{
 			Cfg:    cfg,
+			DbConn: sqlConn,
 			Logger: logger,
 			Tracer: tracer,
 			Meter:  meter,
