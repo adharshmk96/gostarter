@@ -9,7 +9,7 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang-migrate/migrate/v4 v4.18.1
-	github.com/hashicorp/consul/api v1.28.2
+	github.com/hashicorp/consul/api v1.30.0
 	github.com/hashicorp/vault/api v1.15.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/spf13/cobra v1.8.1
