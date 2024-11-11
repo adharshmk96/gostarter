@@ -26,8 +26,8 @@ func NewAccountRepository(container *infra.Container) domain.AccountRepository {
 }
 
 func (a *accountRepository) CreateAccount(ctx context.Context, account *domain.Account) error {
-	_, span := a.tracer.Start(ctx, "AccountRepository.CreateAccount")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountRepository.CreateAccount")
+	defer stopSpan()
 
 	id := len(a.accounts) + 1
 	account.ID = id
@@ -45,8 +45,8 @@ func (a *accountRepository) CreateAccount(ctx context.Context, account *domain.A
 }
 
 func (a *accountRepository) GetAccountByID(ctx context.Context, id int) (*domain.Account, error) {
-	_, span := a.tracer.Start(ctx, "AccountRepository.GetAccountByID")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountRepository.GetAccountByID")
+	defer stopSpan()
 
 	var account *domain.Account
 
@@ -65,8 +65,8 @@ func (a *accountRepository) GetAccountByID(ctx context.Context, id int) (*domain
 }
 
 func (a *accountRepository) GetAccountByEmail(ctx context.Context, email string) (*domain.Account, error) {
-	_, span := a.tracer.Start(ctx, "AccountRepository.GetAccountByEmail")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountRepository.GetAccountByEmail")
+	defer stopSpan()
 
 	var account domain.Account
 
@@ -85,8 +85,8 @@ func (a *accountRepository) GetAccountByEmail(ctx context.Context, email string)
 }
 
 func (a *accountRepository) GetAccountByUsername(ctx context.Context, username string) (*domain.Account, error) {
-	_, span := a.tracer.Start(ctx, "AccountRepository.GetAccountByUsername")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountRepository.GetAccountByUsername")
+	defer stopSpan()
 
 	var account domain.Account
 
@@ -105,8 +105,8 @@ func (a *accountRepository) GetAccountByUsername(ctx context.Context, username s
 }
 
 func (a *accountRepository) UpdateAccount(ctx context.Context, account *domain.Account) error {
-	_, span := a.tracer.Start(ctx, "AccountRepository.UpdateAccount")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountRepository.UpdateAccount")
+	defer stopSpan()
 
 	var updatedAccount *domain.Account
 
@@ -126,8 +126,8 @@ func (a *accountRepository) UpdateAccount(ctx context.Context, account *domain.A
 }
 
 func (a *accountRepository) DeleteAccount(ctx context.Context, id int) error {
-	_, span := a.tracer.Start(ctx, "AccountRepository.DeleteAccount")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountRepository.DeleteAccount")
+	defer stopSpan()
 
 	var deletedAccount *domain.Account
 
@@ -147,8 +147,8 @@ func (a *accountRepository) DeleteAccount(ctx context.Context, id int) error {
 }
 
 func (a *accountRepository) ListAccounts(ctx context.Context, pageParams utils.PaginationParams) ([]*domain.Account, error) {
-	_, span := a.tracer.Start(ctx, "AccountRepository.ListAccounts")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountRepository.ListAccounts")
+	defer stopSpan()
 
 	offset := pageParams.GetOffset()
 

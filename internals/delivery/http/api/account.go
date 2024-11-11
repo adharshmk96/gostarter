@@ -6,6 +6,7 @@ import (
 	"gostarter/infra/config"
 	"gostarter/internals/delivery/http/helpers"
 	"gostarter/internals/domain"
+	"gostarter/pkg/utils"
 	"log/slog"
 	"net/http"
 )
@@ -53,8 +54,8 @@ type RegisterAccountResponse struct {
 // @Failure 400 {object} helpers.GeneralResponse
 // @Failure 500 {object} helpers.GeneralResponse
 func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
-	ctx, span := a.tracer.Start(r.Context(), "AccountHandler.Register")
-	defer span.End()
+	ctx, stopSpan := utils.TraceSpan(r.Context(), a.tracer, "AccountHandler.Register")
+	defer stopSpan()
 
 	// Parse request
 	req, err := helpers.ParseRequest[RegisterAccountRequest](r.Body)
@@ -129,13 +130,13 @@ type LoginRequest struct {
 // @Description Login an account
 // @Accept json
 // @Produce json
-// @Param account body LoginRequest true "Account to login"
+// @Param account body LoginRequest true "Login Details"
 // @Success 200 {object} helpers.GeneralResponse
 // @Failure 400 {object} helpers.GeneralResponse
 // @Failure 500 {object} helpers.GeneralResponse
 func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
-	ctx, span := a.tracer.Start(r.Context(), "AccountHandler.Login")
-	defer span.End()
+	ctx, stopSpan := utils.TraceSpan(r.Context(), a.tracer, "AccountHandler.Login")
+	defer stopSpan()
 
 	// Parse request
 	req, err := helpers.ParseRequest[LoginRequest](r.Body)
@@ -202,8 +203,8 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} helpers.GeneralResponse
 // @Failure 500 {object} helpers.GeneralResponse
 func (a *AccountHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	_, span := a.tracer.Start(r.Context(), "AccountHandler.Logout")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(r.Context(), a.tracer, "AccountHandler.Logout")
+	defer stopSpan()
 
 	// Set token in http only cookie
 	http.SetCookie(w, &http.Cookie{
@@ -237,8 +238,8 @@ type ProfileResponse struct {
 // @Success 200 {object} ProfileResponse
 // @Failure 500 {object} helpers.GeneralResponse
 func (a *AccountHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	_, span := a.tracer.Start(r.Context(), "AccountHandler.Profile")
-	defer span.End()
+	_, stopSpan := utils.TraceSpan(r.Context(), a.tracer, "AccountHandler.Profile")
+	defer stopSpan()
 
 	// Get account from context
 	acc, err := helpers.GetAccountFromContext(r.Context())
