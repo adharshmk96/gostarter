@@ -53,7 +53,7 @@ paths:
       - application/json
       description: Login an account
       parameters:
-      - description: Account to login
+      - description: Login Details
         in: body
         name: account
         required: true

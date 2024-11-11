@@ -30,7 +30,7 @@ const docTemplate = `{
                 "summary": "Login an account",
                 "parameters": [
                     {
-                        "description": "Account to login",
+                        "description": "Login Details",
                         "name": "account",
                         "in": "body",
                         "required": true,
