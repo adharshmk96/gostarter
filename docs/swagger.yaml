@@ -2,29 +2,27 @@ basePath: /api
 definitions:
   api.LoginRequest:
     properties:
-      password:
+      email:
         type: string
-      username:
+      password:
         type: string
     type: object
   api.ProfileResponse:
     properties:
+      email:
+        type: string
       id:
         type: integer
       roles:
         items:
           type: string
         type: array
-      username:
-        type: string
     type: object
   api.RegisterAccountRequest:
     properties:
       email:
         type: string
       password:
-        type: string
-      username:
         type: string
     type: object
   api.RegisterAccountResponse:

@@ -170,10 +170,10 @@ const docTemplate = `{
         "api.LoginRequest": {
             "type": "object",
             "properties": {
-                "password": {
+                "email": {
                     "type": "string"
                 },
-                "username": {
+                "password": {
                     "type": "string"
                 }
             }
@@ -181,6 +181,9 @@ const docTemplate = `{
         "api.ProfileResponse": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -189,9 +192,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         },
@@ -202,9 +202,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
