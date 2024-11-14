@@ -1,13 +1,14 @@
 services:
+
   consul:
-    image: consul:latest
+    image: hashicorp/consul:latest
     container_name: gostarter_consul
     ports:
       - "8500:8500"
     restart: always
 
   vault:
-    image: vault:latest
+    image: hashicorp/vault:latest
     container_name: gostarter_vault
     ports:
       - "8200:8200"

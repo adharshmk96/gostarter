@@ -30,3 +30,5 @@ logs
 tmp
 .gostarter.yaml
 volumes
+
+gostarter-web

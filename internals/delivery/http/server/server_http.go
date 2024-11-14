@@ -3,9 +3,13 @@ package server
 import (
 	_ "gostarter/docs"
 	"gostarter/infra"
+	"gostarter/infra/config"
 	"gostarter/internals/delivery/http/api"
+	"gostarter/internals/delivery/http/server/routing"
+	"gostarter/internals/delivery/http/web"
 	"gostarter/internals/service"
-	"gostarter/internals/storage/memory"
+	"gostarter/internals/storage/pgstorage"
+	"gostarter/pkg/rendering"
 
 	"context"
 	"net/http"
@@ -28,19 +32,25 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 
 	tokenService := service.NewTokenService(cfg.JWT)
 
+	renderer := rendering.NewHtmlRenderer(config.TEMPLATE_DIR)
+
 	// Storage
-	accountRepo := memory.NewAccountRepository(container)
+	//accountRepo := memory.NewAccountRepository(container)
+	accountDbRepo := pgstorage.NewAccountRepository(container)
 
 	// Services
-	accountService := service.NewAccountService(container, accountRepo)
+	accountService := service.NewAccountService(container, accountDbRepo)
 
-	// Handlers
+	// API Handlers
 	accountHandler := api.NewAccountHandler(container, accountService, tokenService)
+	accountWebHandler := web.NewAccountWebHandler(renderer, tokenService, accountService)
 
-	r := SetupRoutes(
+	r := routing.SetupRoutes(
 		container,
 		tokenService,
 		accountHandler,
+
+		accountWebHandler,
 	)
 
 	return &HttpServer{

@@ -33,3 +33,20 @@ func JWTAuthMiddleware(tokenService domain.TokenService) func(http.Handler) http
 		return http.HandlerFunc(hfn)
 	}
 }
+
+func RedirectIfLoggedIn(tokenService domain.TokenService, redirect string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		hfn := func(w http.ResponseWriter, r *http.Request) {
+			userJWT, err := r.Cookie(config.AUTH_COOKIE_NAME)
+			valid, err := tokenService.VerifyJWT(userJWT.Value)
+			if valid && err == nil {
+				http.Redirect(w, r, redirect, http.StatusSeeOther)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		}
+
+		return http.HandlerFunc(hfn)
+	}
+}

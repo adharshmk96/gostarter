@@ -1,4 +1,4 @@
-package server
+package routing
 
 import (
 	"github.com/MarceloPetrucio/go-scalar-api-reference"
@@ -7,7 +7,9 @@ import (
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gostarter/infra"
+	"gostarter/infra/config"
 	custommiddleware "gostarter/internals/delivery/http/middleware"
+	"gostarter/internals/delivery/http/web"
 	"gostarter/internals/domain"
 	"net/http"
 	"strings"
@@ -17,12 +19,14 @@ func SetupRoutes(
 	container *infra.Container,
 	tokenService domain.TokenService,
 	accountHandler domain.AccountHandler,
+
+	accountWebHandler *web.AccountWebHandler,
 ) *chi.Mux {
 	cfg := container.Cfg
 
 	r := chi.NewRouter()
 
-	// Middlewares
+	// Setup Middlewares
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Throttle(12000))
@@ -43,10 +47,16 @@ func SetupRoutes(
 		_, _ = w.Write([]byte("OK"))
 	})
 
+	// Serve static files
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir(config.STATIC_DIR))))
+
+	// Web Routes
+	accountWebRoutes(r, accountWebHandler, tokenService)
+
 	// API Routes
 	r.Route("/api/v1", func(r chi.Router) {
 		// Routes
-		accountRoutes(r, accountHandler, tokenService)
+		accountApiRoutes(r, accountHandler, tokenService)
 	})
 
 	baseUrl := "http://" + strings.TrimPrefix(cfg.Server.BaseURL, "http://")
@@ -74,15 +84,4 @@ func SetupRoutes(
 
 	return r
 
-}
-
-func accountRoutes(r chi.Router, accountHandler domain.AccountHandler, tokenService domain.TokenService) {
-	r.Post("/auth/register", accountHandler.Register)
-	r.Post("/auth/login", accountHandler.Login)
-
-	r.Group(func(r chi.Router) {
-		r.Use(custommiddleware.JWTAuthMiddleware(tokenService))
-		r.Post("/auth/logout", accountHandler.Logout)
-		r.Get("/auth/profile", accountHandler.Profile)
-	})
 }

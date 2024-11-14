@@ -3,7 +3,7 @@ server:
   port: 8080
   allow_origins: "http://localhost:3000"
 database:
-  migration_files: "platform/tools/migration"
+  migration_files: "platform/migration"
   postgres:
     connection: "postgres://gostarter:gostarter@localhost:5432/gostarter?sslmode=disable"
 jwt:
@@ -21,4 +21,4 @@ vault:
   url: "http://localhost:8200"
   token: "root"
 consul:
-  url: "http://localhost:8500"Î
+  url: "http://localhost:8500"

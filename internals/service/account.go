@@ -80,13 +80,6 @@ func (a *accountService) GetAccountByEmail(ctx context.Context, email string) (*
 	return a.accountRepo.GetAccountByEmail(ctx, email)
 }
 
-func (a *accountService) GetAccountByUsername(ctx context.Context, username string) (*domain.Account, error) {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.GetAccountByUsername")
-	defer stopSpan()
-
-	return a.accountRepo.GetAccountByUsername(ctx, username)
-}
-
 func (a *accountService) UpdateAccount(ctx context.Context, account *domain.Account) error {
 	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.UpdateAccount")
 	defer stopSpan()

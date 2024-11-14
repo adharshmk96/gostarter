@@ -14,12 +14,12 @@ type tokenService struct {
 	tokenExpiry int
 }
 
-func (a *tokenService) GenerateJWT(id int, username string, roles []string) (string, error) {
+func (a *tokenService) GenerateJWT(id int, email string, roles []string) (string, error) {
 	claims := jwt.MapClaims{
-		"userId":   id,
-		"username": username,
-		"roles":    roles,
-		"exp":      time.Now().Add(time.Hour * time.Duration(a.tokenExpiry)).Unix(),
+		"userId": id,
+		"email":  email,
+		"roles":  roles,
+		"exp":    time.Now().Add(time.Hour * time.Duration(a.tokenExpiry)).Unix(),
 	}
 
 	return a.jwtUtil.EncodeJWT(claims)
@@ -63,14 +63,15 @@ func (a *tokenService) ExtractAccount(userJWT string) (*domain.Account, error) {
 	if !ok {
 		return nil, domain.ErrInvalidToken
 	}
-	username, ok := decodedJwt.Claims.(jwt.MapClaims)["username"].(string)
+	email, ok := decodedJwt.Claims.(jwt.MapClaims)["email"].(string)
 	if !ok {
 		return nil, domain.ErrInvalidToken
 	}
 
 	userAccount := &domain.Account{
-		ID:       userId,
-		Username: username,
+		Id:       userId,
+		Username: email,
+		Email:    email,
 		Roles:    roles,
 	}
 

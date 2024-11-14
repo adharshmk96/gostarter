@@ -34,7 +34,6 @@ func NewAccountHandler(
 }
 
 type RegisterAccountRequest struct {
-	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -71,9 +70,10 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	acc := &domain.Account{
-		Username: req.Username,
+		Username: req.Email,
 		Email:    req.Email,
 		Password: req.Password,
+		Roles:    []string{domain.ROLE_USER},
 	}
 
 	// Register account
@@ -90,7 +90,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT
-	token, err := a.tokenService.GenerateJWT(acc.ID, acc.Username, acc.Roles)
+	token, err := a.tokenService.GenerateJWT(acc.Id, acc.Email, acc.Roles)
 	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "failed to generate token",
@@ -120,7 +120,7 @@ func (a *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 type LoginRequest struct {
-	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -152,7 +152,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Authenticate account
-	acc, err := a.accountService.Authenticate(ctx, req.Username, req.Password)
+	acc, err := a.accountService.Authenticate(ctx, req.Email, req.Password)
 	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "invalid credentials",
@@ -165,7 +165,7 @@ func (a *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT
-	token, err := a.tokenService.GenerateJWT(acc.ID, acc.Username, acc.Roles)
+	token, err := a.tokenService.GenerateJWT(acc.Id, acc.Email, acc.Roles)
 	if err != nil {
 		errorResponse := helpers.GeneralResponse{
 			Message: "failed to generate token",
@@ -224,9 +224,9 @@ func (a *AccountHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 type ProfileResponse struct {
-	ID       int      `json:"id"`
-	Username string   `json:"username"`
-	Roles    []string `json:"roles"`
+	ID    int      `json:"id"`
+	Email string   `json:"email"`
+	Roles []string `json:"roles"`
 }
 
 // @Router /v1/auth/profile [get]
@@ -256,9 +256,9 @@ func (a *AccountHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 	// Response
 	resp := ProfileResponse{
-		ID:       acc.ID,
-		Username: acc.Username,
-		Roles:    acc.Roles,
+		ID:    acc.Id,
+		Email: acc.Email,
+		Roles: acc.Roles,
 	}
 
 	_ = helpers.WriteResponse(w, http.StatusOK, resp)

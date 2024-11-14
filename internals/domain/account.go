@@ -8,8 +8,13 @@ import (
 	"time"
 )
 
+const (
+	ROLE_USER  = "user"
+	ROLE_ADMIN = "admin"
+)
+
 type Account struct {
-	ID int `json:"id"`
+	Id int `json:"id"`
 
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -39,7 +44,6 @@ type AccountService interface {
 
 	GetAccountByID(ctx context.Context, id int) (*Account, error)
 	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
-	GetAccountByUsername(ctx context.Context, username string) (*Account, error)
 	UpdateAccount(ctx context.Context, account *Account) error
 	DeleteAccount(ctx context.Context, id int) error
 
@@ -61,7 +65,6 @@ type AccountRepository interface {
 	CreateAccount(ctx context.Context, account *Account) error
 	GetAccountByID(ctx context.Context, id int) (*Account, error)
 	GetAccountByEmail(ctx context.Context, email string) (*Account, error)
-	GetAccountByUsername(ctx context.Context, username string) (*Account, error)
 	UpdateAccount(ctx context.Context, account *Account) error
 	DeleteAccount(ctx context.Context, id int) error
 

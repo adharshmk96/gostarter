@@ -30,7 +30,7 @@ func (a *accountRepository) CreateAccount(ctx context.Context, account *domain.A
 	defer stopSpan()
 
 	id := len(a.accounts) + 1
-	account.ID = id
+	account.Id = id
 	now := time.Now()
 	account.CreatedAt = now
 	account.UpdatedAt = now
@@ -51,13 +51,13 @@ func (a *accountRepository) GetAccountByID(ctx context.Context, id int) (*domain
 	var account *domain.Account
 
 	for _, acc := range a.accounts {
-		if acc.ID == id {
+		if acc.Id == id {
 			account = &acc
 			break
 		}
 	}
 
-	if account == nil || account.ID == 0 {
+	if account == nil || account.Id == 0 {
 		return nil, domain.ErrAccountNotFound
 	}
 
@@ -111,14 +111,14 @@ func (a *accountRepository) UpdateAccount(ctx context.Context, account *domain.A
 	var updatedAccount *domain.Account
 
 	for i, acc := range a.accounts {
-		if acc.ID == account.ID {
+		if acc.Id == account.Id {
 			updatedAccount = account
 			a.accounts[i] = *account
 			break
 		}
 	}
 
-	if updatedAccount == nil || updatedAccount.ID == 0 {
+	if updatedAccount == nil || updatedAccount.Id == 0 {
 		return domain.ErrAccountNotFound
 	}
 
@@ -132,14 +132,14 @@ func (a *accountRepository) DeleteAccount(ctx context.Context, id int) error {
 	var deletedAccount *domain.Account
 
 	for i, acc := range a.accounts {
-		if acc.ID == id {
+		if acc.Id == id {
 			deletedAccount = &a.accounts[i]
 			a.accounts = append(a.accounts[:i], a.accounts[i+1:]...)
 			break
 		}
 	}
 
-	if deletedAccount == nil || deletedAccount.ID == 0 {
+	if deletedAccount == nil || deletedAccount.Id == 0 {
 		return domain.ErrAccountNotFound
 	}
 
