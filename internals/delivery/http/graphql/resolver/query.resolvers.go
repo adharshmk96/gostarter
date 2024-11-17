@@ -11,21 +11,21 @@ import (
 	"gostarter/pkg/utils"
 )
 
-// GetAccountByID is the resolver for the getAccountById field.
-func (r *queryResolver) GetAccountByID(ctx context.Context, id int) (*domain.Account, error) {
+// AccountByID is the resolver for the accountById field.
+func (r *queryResolver) AccountByID(ctx context.Context, id int) (*domain.Account, error) {
 	return r.AccountService.GetAccountByID(ctx, id)
 }
 
-// GetAccountByEmail is the resolver for the getAccountByEmail field.
-func (r *queryResolver) GetAccountByEmail(ctx context.Context, email string) (*domain.Account, error) {
+// AccountByEmail is the resolver for the accountByEmail field.
+func (r *queryResolver) AccountByEmail(ctx context.Context, email string) (*domain.Account, error) {
 	return r.AccountService.GetAccountByEmail(ctx, email)
 }
 
-// ListAccounts is the resolver for the listAccounts field.
-func (r *queryResolver) ListAccounts(ctx context.Context, limit *int, offset *int) ([]*domain.Account, error) {
+// Accounts is the resolver for the accounts field.
+func (r *queryResolver) Accounts(ctx context.Context, limit *int, offset *int) ([]*domain.Account, error) {
 	p := utils.PaginationParams{
-		Page: *offset,
-		Size: *limit,
+		Page: utils.ParseNullInt(offset),
+		Size: utils.ParseNullInt(limit),
 	}
 	return r.AccountService.ListAccounts(ctx, p)
 }

@@ -1,5 +1,8 @@
+directive @auth on FIELD_DEFINITION
+directive @hasRole(roles: [String]!) on FIELD_DEFINITION
+
 type Query {
-    getAccountById(id: Int!): Account
-    getAccountByEmail(email: String!): Account
-    listAccounts(limit: Int, offset: Int): [Account!]!
+    accountById(id: Int!): Account @auth
+    accountByEmail(email: String!): Account @hasRole(roles: ["admin"])
+    accounts(limit: Int, offset: Int): [Account!]! @hasRole(roles: ["admin"])
 }

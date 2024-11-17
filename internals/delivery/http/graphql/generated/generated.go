@@ -44,6 +44,8 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Auth    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	HasRole func(ctx context.Context, obj interface{}, next graphql.Resolver, roles []*string) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -58,9 +60,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAccountByEmail func(childComplexity int, email string) int
-		GetAccountByID    func(childComplexity int, id int) int
-		ListAccounts      func(childComplexity int, limit *int, offset *int) int
+		AccountByEmail func(childComplexity int, email string) int
+		AccountByID    func(childComplexity int, id int) int
+		Accounts       func(childComplexity int, limit *int, offset *int) int
 	}
 }
 
@@ -70,9 +72,9 @@ type AccountResolver interface {
 	UpdatedAt(ctx context.Context, obj *domain.Account) (string, error)
 }
 type QueryResolver interface {
-	GetAccountByID(ctx context.Context, id int) (*domain.Account, error)
-	GetAccountByEmail(ctx context.Context, email string) (*domain.Account, error)
-	ListAccounts(ctx context.Context, limit *int, offset *int) ([]*domain.Account, error)
+	AccountByID(ctx context.Context, id int) (*domain.Account, error)
+	AccountByEmail(ctx context.Context, email string) (*domain.Account, error)
+	Accounts(ctx context.Context, limit *int, offset *int) ([]*domain.Account, error)
 }
 
 type executableSchema struct {
@@ -143,41 +145,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Account.Username(childComplexity), true
 
-	case "Query.getAccountByEmail":
-		if e.complexity.Query.GetAccountByEmail == nil {
+	case "Query.accountByEmail":
+		if e.complexity.Query.AccountByEmail == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getAccountByEmail_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_accountByEmail_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAccountByEmail(childComplexity, args["email"].(string)), true
+		return e.complexity.Query.AccountByEmail(childComplexity, args["email"].(string)), true
 
-	case "Query.getAccountById":
-		if e.complexity.Query.GetAccountByID == nil {
+	case "Query.accountById":
+		if e.complexity.Query.AccountByID == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getAccountById_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_accountById_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAccountByID(childComplexity, args["id"].(int)), true
+		return e.complexity.Query.AccountByID(childComplexity, args["id"].(int)), true
 
-	case "Query.listAccounts":
-		if e.complexity.Query.ListAccounts == nil {
+	case "Query.accounts":
+		if e.complexity.Query.Accounts == nil {
 			break
 		}
 
-		args, err := ec.field_Query_listAccounts_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_accounts_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.ListAccounts(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Accounts(childComplexity, args["limit"].(*int), args["offset"].(*int)), true
 
 	}
 	return 0, false
@@ -284,10 +286,13 @@ type Account {
 }
 
 `, BuiltIn: false},
-	{Name: "../schema/query.graphql", Input: `type Query {
-    getAccountById(id: Int!): Account
-    getAccountByEmail(email: String!): Account
-    listAccounts(limit: Int, offset: Int): [Account!]!
+	{Name: "../schema/query.graphql", Input: `directive @auth on FIELD_DEFINITION
+directive @hasRole(roles: [String]!) on FIELD_DEFINITION
+
+type Query {
+    accountById(id: Int!): Account @auth
+    accountByEmail(email: String!): Account @hasRole(roles: ["admin"])
+    accounts(limit: Int, offset: Int): [Account!]! @hasRole(roles: ["admin"])
 }
 `, BuiltIn: false},
 }
@@ -296,6 +301,38 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.dir_hasRole_argsRoles(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["roles"] = arg0
+	return args, nil
+}
+func (ec *executionContext) dir_hasRole_argsRoles(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["roles"]
+	if !ok {
+		var zeroVal []*string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("roles"))
+	if tmp, ok := rawArgs["roles"]; ok {
+		return ec.unmarshalNString2ᚕᚖstring(ctx, tmp)
+	}
+
+	var zeroVal []*string
+	return zeroVal, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -329,17 +366,17 @@ func (ec *executionContext) field_Query___type_argsName(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_getAccountByEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_accountByEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getAccountByEmail_argsEmail(ctx, rawArgs)
+	arg0, err := ec.field_Query_accountByEmail_argsEmail(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["email"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_getAccountByEmail_argsEmail(
+func (ec *executionContext) field_Query_accountByEmail_argsEmail(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -361,17 +398,17 @@ func (ec *executionContext) field_Query_getAccountByEmail_argsEmail(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_getAccountById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_accountById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_getAccountById_argsID(ctx, rawArgs)
+	arg0, err := ec.field_Query_accountById_argsID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_getAccountById_argsID(
+func (ec *executionContext) field_Query_accountById_argsID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (int, error) {
@@ -393,22 +430,22 @@ func (ec *executionContext) field_Query_getAccountById_argsID(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_listAccounts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_accounts_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_listAccounts_argsLimit(ctx, rawArgs)
+	arg0, err := ec.field_Query_accounts_argsLimit(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["limit"] = arg0
-	arg1, err := ec.field_Query_listAccounts_argsOffset(ctx, rawArgs)
+	arg1, err := ec.field_Query_accounts_argsOffset(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["offset"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Query_listAccounts_argsLimit(
+func (ec *executionContext) field_Query_accounts_argsLimit(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*int, error) {
@@ -430,7 +467,7 @@ func (ec *executionContext) field_Query_listAccounts_argsLimit(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_listAccounts_argsOffset(
+func (ec *executionContext) field_Query_accounts_argsOffset(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*int, error) {
@@ -832,8 +869,8 @@ func (ec *executionContext) fieldContext_Account_updatedAt(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getAccountById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getAccountById(ctx, field)
+func (ec *executionContext) _Query_accountById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_accountById(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -845,8 +882,30 @@ func (ec *executionContext) _Query_getAccountById(ctx context.Context, field gra
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAccountByID(rctx, fc.Args["id"].(int))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().AccountByID(rctx, fc.Args["id"].(int))
+		}
+
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Auth == nil {
+				var zeroVal *domain.Account
+				return zeroVal, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*domain.Account); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *gostarter/internals/domain.Account`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -860,7 +919,7 @@ func (ec *executionContext) _Query_getAccountById(ctx context.Context, field gra
 	return ec.marshalOAccount2ᚖgostarterᚋinternalsᚋdomainᚐAccount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getAccountById(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_accountById(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -893,15 +952,15 @@ func (ec *executionContext) fieldContext_Query_getAccountById(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getAccountById_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_accountById_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getAccountByEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_getAccountByEmail(ctx, field)
+func (ec *executionContext) _Query_accountByEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_accountByEmail(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -913,8 +972,35 @@ func (ec *executionContext) _Query_getAccountByEmail(ctx context.Context, field 
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAccountByEmail(rctx, fc.Args["email"].(string))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().AccountByEmail(rctx, fc.Args["email"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			roles, err := ec.unmarshalNString2ᚕᚖstring(ctx, []interface{}{"admin"})
+			if err != nil {
+				var zeroVal *domain.Account
+				return zeroVal, err
+			}
+			if ec.directives.HasRole == nil {
+				var zeroVal *domain.Account
+				return zeroVal, errors.New("directive hasRole is not implemented")
+			}
+			return ec.directives.HasRole(ctx, nil, directive0, roles)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*domain.Account); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *gostarter/internals/domain.Account`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -928,7 +1014,7 @@ func (ec *executionContext) _Query_getAccountByEmail(ctx context.Context, field 
 	return ec.marshalOAccount2ᚖgostarterᚋinternalsᚋdomainᚐAccount(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getAccountByEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_accountByEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -961,15 +1047,15 @@ func (ec *executionContext) fieldContext_Query_getAccountByEmail(ctx context.Con
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getAccountByEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_accountByEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_listAccounts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_listAccounts(ctx, field)
+func (ec *executionContext) _Query_accounts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_accounts(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -981,8 +1067,35 @@ func (ec *executionContext) _Query_listAccounts(ctx context.Context, field graph
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ListAccounts(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Accounts(rctx, fc.Args["limit"].(*int), fc.Args["offset"].(*int))
+		}
+
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			roles, err := ec.unmarshalNString2ᚕᚖstring(ctx, []interface{}{"admin"})
+			if err != nil {
+				var zeroVal []*domain.Account
+				return zeroVal, err
+			}
+			if ec.directives.HasRole == nil {
+				var zeroVal []*domain.Account
+				return zeroVal, errors.New("directive hasRole is not implemented")
+			}
+			return ec.directives.HasRole(ctx, nil, directive0, roles)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*domain.Account); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*gostarter/internals/domain.Account`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -999,7 +1112,7 @@ func (ec *executionContext) _Query_listAccounts(ctx context.Context, field graph
 	return ec.marshalNAccount2ᚕᚖgostarterᚋinternalsᚋdomainᚐAccountᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_listAccounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_accounts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1032,7 +1145,7 @@ func (ec *executionContext) fieldContext_Query_listAccounts(ctx context.Context,
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_listAccounts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_accounts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3130,7 +3243,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getAccountById":
+		case "accountById":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3139,7 +3252,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getAccountById(ctx, field)
+				res = ec._Query_accountById(ctx, field)
 				return res
 			}
 
@@ -3149,7 +3262,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getAccountByEmail":
+		case "accountByEmail":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3158,7 +3271,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getAccountByEmail(ctx, field)
+				res = ec._Query_accountByEmail(ctx, field)
 				return res
 			}
 
@@ -3168,7 +3281,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "listAccounts":
+		case "accounts":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3177,7 +3290,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_listAccounts(ctx, field)
+				res = ec._Query_accounts(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -3715,6 +3828,32 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

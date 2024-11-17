@@ -64,7 +64,6 @@ func SetupRoutes(
 	// Swagger API docs
 	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
 		htmlContent, err := scalar.ApiReferenceHTML(&scalar.Options{
-			// SpecURL: "https://generator3.swagger.io/openapi.json",// allow external URL or local path file
 			SpecURL: baseUrl + "/swagger/doc.json",
 			CustomOptions: scalar.CustomOptions{
 				PageTitle: "gostarter API",
