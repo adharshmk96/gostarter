@@ -1,0 +1,15 @@
+enum Role {
+    USER
+    ADMIN
+}
+
+type Account {
+    id: Int!
+    username: String!
+    email: String!
+    password: String!
+    roles: [Role!]!
+    createdAt: String!
+    updatedAt: String!
+}
+

@@ -5,6 +5,7 @@ import (
 	"gostarter/infra"
 	"gostarter/infra/config"
 	"gostarter/internals/delivery/http/api"
+	"gostarter/internals/delivery/http/graphql"
 	"gostarter/internals/delivery/http/server/routing"
 	"gostarter/internals/delivery/http/web"
 	"gostarter/internals/service"
@@ -52,6 +53,9 @@ func NewHttpServer(container *infra.Container) *HttpServer {
 
 		accountWebHandler,
 	)
+
+	gqlHandler := graphql.NewGQLHandler(container, accountService)
+	gqlHandler.SetupRoutes(r)
 
 	return &HttpServer{
 		server: &http.Server{

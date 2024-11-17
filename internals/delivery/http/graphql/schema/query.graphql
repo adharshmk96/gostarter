@@ -1,0 +1,5 @@
+type Query {
+    getAccountById(id: Int!): Account
+    getAccountByEmail(email: String!): Account
+    listAccounts(limit: Int, offset: Int): [Account!]!
+}

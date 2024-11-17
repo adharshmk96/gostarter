@@ -38,6 +38,9 @@ migration:
 migrateup:
 	go run main.go migrate up
 
+gqlgen:
+	go run github.com/99designs/gqlgen generate
+
 swagger:
 	swag init
 
