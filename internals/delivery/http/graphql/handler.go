@@ -1,14 +1,15 @@
 package graphql
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/go-chi/chi/v5"
 	"gostarter/infra"
 	"gostarter/internals/delivery/http/graphql/directives"
 	"gostarter/internals/delivery/http/graphql/generated"
 	"gostarter/internals/delivery/http/graphql/resolver"
 	"gostarter/internals/domain"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi/v5"
 )
 
 type GQLHandler struct {
