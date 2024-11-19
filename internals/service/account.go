@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
-	"github.com/adharshmk96/goutils/auth"
-	"go.opentelemetry.io/otel/trace"
 	"gostarter/infra"
 	"gostarter/pkg/utils"
 	"log/slog"
+
+	"github.com/adharshmk96/goutils/auth"
+	"go.opentelemetry.io/otel/trace"
 
 	"gostarter/internals/domain"
 )
@@ -28,8 +29,8 @@ func NewAccountService(container *infra.Container, accountRepo domain.AccountRep
 }
 
 func (a *accountService) Register(ctx context.Context, account *domain.Account) error {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.Register")
-	defer stopSpan()
+	ctx, span := a.tracer.Start(ctx, "AccountService.Register")
+	defer span.End()
 
 	passwdHash, err := auth.HashPassword(account.Password, auth.DefaultParams)
 	if err != nil {
@@ -42,8 +43,8 @@ func (a *accountService) Register(ctx context.Context, account *domain.Account) 
 }
 
 func (a *accountService) Authenticate(ctx context.Context, email, password string) (*domain.Account, error) {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.Authenticate")
-	defer stopSpan()
+	ctx, span := a.tracer.Start(ctx, "AccountService.Authenticate")
+	defer span.End()
 
 	account, err := a.accountRepo.GetAccountByEmail(ctx, email)
 	if err != nil {
@@ -67,36 +68,36 @@ func (a *accountService) Authenticate(ctx context.Context, email, password strin
 }
 
 func (a *accountService) GetAccountByID(ctx context.Context, id int) (*domain.Account, error) {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.GetAccountByID")
-	defer stopSpan()
+	ctx, span := a.tracer.Start(ctx, "AccountService.GetAccountByID")
+	defer span.End()
 
 	return a.accountRepo.GetAccountByID(ctx, id)
 }
 
 func (a *accountService) GetAccountByEmail(ctx context.Context, email string) (*domain.Account, error) {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.GetAccountByEmail")
-	defer stopSpan()
+	ctx, span := a.tracer.Start(ctx, "AccountService.GetAccountByEmail")
+	defer span.End()
 
 	return a.accountRepo.GetAccountByEmail(ctx, email)
 }
 
 func (a *accountService) UpdateAccount(ctx context.Context, account *domain.Account) error {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.UpdateAccount")
-	defer stopSpan()
+	ctx, span := a.tracer.Start(ctx, "AccountService.UpdateAccount")
+	defer span.End()
 
 	return a.accountRepo.UpdateAccount(ctx, account)
 }
 
 func (a *accountService) DeleteAccount(ctx context.Context, id int) error {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.DeleteAccount")
-	defer stopSpan()
+	ctx, span := a.tracer.Start(ctx, "AccountService.DeleteAccount")
+	defer span.End()
 
 	return a.accountRepo.DeleteAccount(ctx, id)
 }
 
 func (a *accountService) ListAccounts(ctx context.Context, paginationParams utils.PaginationParams) ([]*domain.Account, error) {
-	ctx, stopSpan := utils.TraceSpan(ctx, a.tracer, "AccountService.ListAccounts")
-	defer stopSpan()
+	ctx, span := a.tracer.Start(ctx, "AccountService.ListAccounts")
+	defer span.End()
 
 	return a.accountRepo.ListAccounts(ctx, paginationParams)
 }

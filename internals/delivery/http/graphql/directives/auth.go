@@ -3,10 +3,11 @@ package directives
 import (
 	"context"
 	"errors"
-	"fitnesshub/internals/delivery/http/helpers"
-	"fitnesshub/pkg/utils"
-	"github.com/99designs/gqlgen/graphql"
+	"gostarter/internals/delivery/http/helpers"
+	"gostarter/pkg/utils"
 	"slices"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 func Auth(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {

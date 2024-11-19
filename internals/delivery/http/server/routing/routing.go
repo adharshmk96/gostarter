@@ -1,11 +1,6 @@
 package routing
 
 import (
-	"github.com/MarceloPetrucio/go-scalar-api-reference"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
-	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gostarter/infra"
 	"gostarter/infra/config"
 	custommiddleware "gostarter/internals/delivery/http/middleware"
@@ -13,6 +8,12 @@ import (
 	"gostarter/internals/domain"
 	"net/http"
 	"strings"
+
+	"github.com/MarceloPetrucio/go-scalar-api-reference"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 func SetupRoutes(
@@ -41,6 +42,8 @@ func SetupRoutes(
 	r.Use(custommiddleware.NewLatencyMiddleware(container.Meter))
 	r.Use(custommiddleware.NewCounterMiddleware(container.Meter))
 
+	r.Use(custommiddleware.JWTMiddleware(tokenService))
+
 	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -51,12 +54,12 @@ func SetupRoutes(
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir(config.STATIC_DIR))))
 
 	// Web Routes
-	accountWebRoutes(r, accountWebHandler, tokenService)
+	accountWebRoutes(r, accountWebHandler)
 
 	// API Routes
 	r.Route("/api/v1", func(r chi.Router) {
 		// Routes
-		accountApiRoutes(r, accountHandler, tokenService)
+		accountApiRoutes(r, accountHandler)
 	})
 
 	baseUrl := "http://" + strings.TrimPrefix(cfg.Server.BaseURL, "http://")
