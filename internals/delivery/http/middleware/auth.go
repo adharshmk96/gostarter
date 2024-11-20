@@ -3,23 +3,24 @@ package middleware
 import (
 	"context"
 	"gostarter/infra/config"
+	"gostarter/internals/delivery/http/helpers"
 	"gostarter/internals/domain"
 	"net/http"
 )
 
-func JWTAuthMiddleware(tokenService domain.TokenService) func(http.Handler) http.Handler {
+func JWTMiddleware(tokenService domain.TokenService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
 			userJWT, err := r.Cookie(config.AUTH_COOKIE_NAME)
 			if err != nil {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				next.ServeHTTP(w, r)
 				return
 			}
 
 			// Send account to context
 			account, err := tokenService.ExtractAccount(userJWT.Value)
 			if err != nil {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				next.ServeHTTP(w, r)
 				return
 			}
 
@@ -34,12 +35,25 @@ func JWTAuthMiddleware(tokenService domain.TokenService) func(http.Handler) http
 	}
 }
 
-func RedirectIfLoggedIn(tokenService domain.TokenService, redirect string) func(http.Handler) http.Handler {
+func IsAuthenticated(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !isAuth(r.Context()) {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func isAuth(ctx context.Context) bool {
+	acc, err := helpers.GetAccountFromContext(ctx)
+	return acc != nil && err == nil
+}
+
+func RedirectIfLoggedIn(redirect string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
-			userJWT, err := r.Cookie(config.AUTH_COOKIE_NAME)
-			valid, err := tokenService.VerifyJWT(userJWT.Value)
-			if valid && err == nil {
+			if isAuth(r.Context()) {
 				http.Redirect(w, r, redirect, http.StatusSeeOther)
 				return
 			}

@@ -38,6 +38,9 @@ migration:
 migrateup:
 	go run main.go migrate up
 
+gqlgen:
+	go run github.com/99designs/gqlgen generate
+
 swagger:
 	swag init
 
@@ -50,5 +53,6 @@ maiden: install init
 	docker compose -f docker-compose.dev.yml up --build -d
 	go run . serve
 
-run:
-	go run main.go serve
+dev:
+	docker compose -f docker-compose.dev.yml up -d
+	air
