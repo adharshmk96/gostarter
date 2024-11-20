@@ -53,5 +53,6 @@ maiden: install init
 	docker compose -f docker-compose.dev.yml up --build -d
 	go run . serve
 
-run:
-	go run main.go serve
+dev:
+	docker compose -f docker-compose.dev.yml up -d
+	air

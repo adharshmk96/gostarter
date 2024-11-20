@@ -31,7 +31,6 @@ type AccountHandler interface {
 	Login(w http.ResponseWriter, r *http.Request)
 	Logout(w http.ResponseWriter, r *http.Request)
 	Profile(w http.ResponseWriter, r *http.Request)
-	//ChangePassword(w http.ResponseWriter, r *http.Request)
 }
 
 var (
@@ -48,12 +47,6 @@ type AccountService interface {
 	DeleteAccount(ctx context.Context, id int) error
 
 	ListAccounts(context.Context, utils.PaginationParams) ([]*Account, error)
-}
-
-type TokenService interface {
-	GenerateJWT(id int, username string, roles []string) (string, error)
-	VerifyJWT(token string) (bool, error)
-	ExtractAccount(token string) (*Account, error)
 }
 
 var (
