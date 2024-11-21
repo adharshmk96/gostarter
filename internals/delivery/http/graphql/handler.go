@@ -5,7 +5,6 @@ import (
 	"gostarter/internals/delivery/http/graphql/directives"
 	"gostarter/internals/delivery/http/graphql/generated"
 	"gostarter/internals/delivery/http/graphql/resolver"
-	"gostarter/internals/domain"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -18,12 +17,12 @@ type GQLHandler struct {
 
 func NewGQLHandler(
 	container *infra.Container,
-	accountService domain.AccountService,
+	serviceDi *di.ServiceContainer,
 ) *GQLHandler {
 	config := generated.Config{
 		Resolvers: &resolver.Resolver{
-			Container:      container,
-			AccountService: accountService,
+			Container: container,
+			ServiceDi: serviceDi,
 		},
 		Directives: generated.DirectiveRoot{
 			Auth:    directives.Auth,

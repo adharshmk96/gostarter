@@ -16,10 +16,10 @@ type AccountWebHandler struct {
 }
 
 func NewAccountWebHandler(
-	renderer *rendering.HtmlRenderer,
 	tokenService domain.TokenService,
 	accountService domain.AccountService,
 ) *AccountWebHandler {
+	renderer := rendering.NewHtmlRenderer(config.TEMPLATE_DIR)
 	return &AccountWebHandler{
 		accountService: accountService,
 		tokenService:   tokenService,

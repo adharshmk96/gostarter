@@ -4,8 +4,7 @@ import (
 	"gostarter/infra"
 	"gostarter/infra/config"
 	custommiddleware "gostarter/internals/delivery/http/middleware"
-	"gostarter/internals/delivery/http/web"
-	"gostarter/internals/domain"
+	"gostarter/internals/di"
 	"net/http"
 	"strings"
 
@@ -18,10 +17,8 @@ import (
 
 func SetupRoutes(
 	container *infra.Container,
-	tokenService domain.TokenService,
-	accountHandler domain.AccountHandler,
-
-	accountWebHandler *web.AccountWebHandler,
+	serviceDi *di.ServiceContainer,
+	handlerDi *di.HandlerContainer,
 ) *chi.Mux {
 	cfg := container.Cfg
 
@@ -42,7 +39,7 @@ func SetupRoutes(
 	r.Use(custommiddleware.NewLatencyMiddleware(container.Meter))
 	r.Use(custommiddleware.NewCounterMiddleware(container.Meter))
 
-	r.Use(custommiddleware.JWTMiddleware(tokenService))
+	r.Use(custommiddleware.JWTMiddleware(serviceDi.TokenService))
 
 	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -54,12 +51,12 @@ func SetupRoutes(
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir(config.STATIC_DIR))))
 
 	// Web Routes
-	accountWebRoutes(r, accountWebHandler)
+	accountWebRoutes(r, handlerDi.AccountWebHandler)
 
 	// API Routes
 	r.Route("/api/v1", func(r chi.Router) {
 		// Routes
-		accountApiRoutes(r, accountHandler)
+		accountApiRoutes(r, handlerDi.AccountHandler)
 	})
 
 	baseUrl := "http://" + strings.TrimPrefix(cfg.Server.BaseURL, "http://")

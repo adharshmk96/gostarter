@@ -13,12 +13,12 @@ import (
 
 // AccountByID is the resolver for the accountById field.
 func (r *queryResolver) AccountByID(ctx context.Context, id int) (*domain.Account, error) {
-	return r.AccountService.GetAccountByID(ctx, id)
+	return r.ServiceDi.AccountService.GetAccountByID(ctx, id)
 }
 
 // AccountByEmail is the resolver for the accountByEmail field.
 func (r *queryResolver) AccountByEmail(ctx context.Context, email string) (*domain.Account, error) {
-	return r.AccountService.GetAccountByEmail(ctx, email)
+	return r.ServiceDi.AccountService.GetAccountByEmail(ctx, email)
 }
 
 // Accounts is the resolver for the accounts field.
@@ -27,7 +27,7 @@ func (r *queryResolver) Accounts(ctx context.Context, limit *int, offset *int) (
 		Page: utils.ParseNullInt(offset),
 		Size: utils.ParseNullInt(limit),
 	}
-	return r.AccountService.ListAccounts(ctx, p)
+	return r.ServiceDi.AccountService.ListAccounts(ctx, p)
 }
 
 // Query returns generated.QueryResolver implementation.

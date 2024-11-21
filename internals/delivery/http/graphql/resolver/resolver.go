@@ -2,7 +2,7 @@ package resolver
 
 import (
 	"gostarter/infra"
-	"gostarter/internals/domain"
+	"gostarter/internals/di"
 )
 
 // This file will not be regenerated automatically.
@@ -10,6 +10,6 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	Container      *infra.Container
-	AccountService domain.AccountService
+	Container *infra.Container
+	ServiceDi *di.ServiceContainer
 }
