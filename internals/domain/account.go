@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 	"errors"
-	"gostarter/pkg/utils"
 	"net/http"
 	"time"
 )
@@ -46,7 +45,7 @@ type AccountService interface {
 	UpdateAccount(ctx context.Context, account *Account) error
 	DeleteAccount(ctx context.Context, id int) error
 
-	ListAccounts(context.Context, utils.PaginationParams) ([]*Account, error)
+	ListAccounts(context.Context, *Pagination) ([]*Account, error)
 }
 
 var (
@@ -61,7 +60,7 @@ type AccountRepository interface {
 	UpdateAccount(ctx context.Context, account *Account) error
 	DeleteAccount(ctx context.Context, id int) error
 
-	ListAccounts(context.Context, utils.PaginationParams) ([]*Account, error)
+	ListAccounts(context.Context, *Pagination) ([]*Account, error)
 }
 
 // Errors

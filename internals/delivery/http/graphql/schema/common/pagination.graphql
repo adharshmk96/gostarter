@@ -1,0 +1,10 @@
+input Pagination {
+  page: Int!
+  size: Int!
+}
+
+type PageInfo {
+    page: Int!
+    size: Int!
+    total: Int!
+}

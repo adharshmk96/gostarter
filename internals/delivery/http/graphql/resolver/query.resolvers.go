@@ -6,28 +6,43 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 	"gostarter/internals/delivery/http/graphql/generated"
+	"gostarter/internals/delivery/http/graphql/models"
 	"gostarter/internals/domain"
-	"gostarter/pkg/utils"
 )
 
-// AccountByID is the resolver for the accountById field.
-func (r *queryResolver) AccountByID(ctx context.Context, id int) (*domain.Account, error) {
-	return r.AccountService.GetAccountByID(ctx, id)
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*domain.Account, error) {
+	panic(fmt.Errorf("not implemented: Me - me"))
+}
+
+// Accounts is the resolver for the accounts field.
+func (r *queryResolver) Accounts(ctx context.Context, pagination domain.Pagination) (*models.PaginatedAccounts, error) {
+	ctx, span := r.Container.Tracer.Start(ctx, "QueryResolver.Accounts")
+	defer span.End()
+
+	accounts, err := r.ServiceDi.AccountService.ListAccounts(ctx, &pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.PaginatedAccounts{
+		Accounts: accounts,
+		PageInfo: &models.PageInfo{
+			Page:  pagination.Page,
+			Size:  pagination.Size,
+			Total: pagination.Total,
+		},
+	}, nil
 }
 
 // AccountByEmail is the resolver for the accountByEmail field.
 func (r *queryResolver) AccountByEmail(ctx context.Context, email string) (*domain.Account, error) {
-	return r.AccountService.GetAccountByEmail(ctx, email)
-}
+	ctx, span := r.Container.Tracer.Start(ctx, "QueryResolver.AccountByEmail")
+	defer span.End()
 
-// Accounts is the resolver for the accounts field.
-func (r *queryResolver) Accounts(ctx context.Context, limit *int, offset *int) ([]*domain.Account, error) {
-	p := utils.PaginationParams{
-		Page: utils.ParseNullInt(offset),
-		Size: utils.ParseNullInt(limit),
-	}
-	return r.AccountService.ListAccounts(ctx, p)
+	return r.ServiceDi.AccountService.GetAccountByEmail(ctx, email)
 }
 
 // Query returns generated.QueryResolver implementation.

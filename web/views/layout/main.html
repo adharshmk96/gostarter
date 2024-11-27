@@ -1,17 +1,19 @@
 {{ define "layout" }}
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
 
-        <title>{{block "title" .}}Gostarter{{end}}</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{block "title" .}}Gostarter{{end}}</title>
 
-        {{ block "styles" . }}{{end}}
-    </head>
-    <body class="min-h-screen">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    {{ block "styles" . }}{{end}}
+</head>
+
+<body class="min-h-screen">
 
     <nav class="bg-gray-800">
         <div class="max-w-7xl mx-auto px-4">
@@ -21,18 +23,30 @@
                     <a href="#" class="text-white font-bold text-xl">Gostarter</a>
                 </div>
 
+                {{ if .Account }}
+
+                <div class="hidden md:flex items-center">
+                    <form method="post" action="/logout">
+                        <button type="submit" class="text-gray-300 hover:text-white px-3 py-2">Logout</button>
+                    </form>
+                </div>
+                
+                {{ else }}
+
                 <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center">
                     <a href="/register" class="text-gray-300 hover:text-white px-3 py-2">Register</a>
                     <a href="/login" class="text-gray-300 hover:text-white px-3 py-2">Login</a>
                 </div>
 
+                {{ end }}
+
                 <!-- Mobile Menu Button -->
                 <div class="md:hidden flex items-center">
                     <button id="mobile-menu-button" class="text-gray-300 hover:text-white">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M4 6h16M4 12h16M4 18h16"/>
+                                d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
                 </div>
@@ -54,7 +68,8 @@
     <footer class="footer">
 
     </footer>
-    </body>
-    {{ block "scripts" . }}{{end}}
-    </html>
+</body>
+{{ block "scripts" . }}{{end}}
+
+</html>
 {{ end }}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"gostarter/infra"
 	"gostarter/internals/domain"
-	"gostarter/pkg/utils"
 	"log/slog"
 	"time"
 
@@ -147,17 +146,17 @@ func (a *accountRepository) DeleteAccount(ctx context.Context, id int) error {
 	return nil
 }
 
-func (a *accountRepository) ListAccounts(ctx context.Context, pageParams utils.PaginationParams) ([]*domain.Account, error) {
+func (a *accountRepository) ListAccounts(ctx context.Context, pagination *domain.Pagination) ([]*domain.Account, error) {
 	_, span := a.tracer.Start(ctx, "AccountRepository.ListAccounts")
 	defer span.End()
 
-	offset := pageParams.GetOffset()
+	offset := pagination.GetOffset()
 
 	if offset >= len(a.accounts) {
 		return []*domain.Account{}, nil
 	}
 
-	end := offset + pageParams.Size
+	end := offset + pagination.Size
 
 	if end > len(a.accounts) {
 		end = len(a.accounts)

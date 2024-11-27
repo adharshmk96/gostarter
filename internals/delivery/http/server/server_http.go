@@ -3,14 +3,9 @@ package server
 import (
 	_ "gostarter/docs"
 	"gostarter/infra"
-	"gostarter/infra/config"
-	"gostarter/internals/delivery/http/api"
 	"gostarter/internals/delivery/http/graphql"
 	"gostarter/internals/delivery/http/server/routing"
-	"gostarter/internals/delivery/http/web"
-	"gostarter/internals/service"
-	"gostarter/internals/storage/pgstorage"
-	"gostarter/pkg/rendering"
+	"gostarter/internals/di"
 
 	"context"
 	"net/http"
@@ -29,37 +24,22 @@ func (s *HttpServer) Stop(ctx context.Context) error {
 }
 
 func NewHttpServer(container *infra.Container) *HttpServer {
-	cfg := container.Cfg
-
-	tokenService := service.NewTokenService(cfg.JWT)
-
-	renderer := rendering.NewHtmlRenderer(config.TEMPLATE_DIR)
-
-	// Storage
-	//accountRepo := memory.NewAccountRepository(container)
-	accountDbRepo := pgstorage.NewAccountRepository(container)
-
-	// Services
-	accountService := service.NewAccountService(container, accountDbRepo)
-
-	// API Handlers
-	accountHandler := api.NewAccountHandler(container, accountService, tokenService)
-	accountWebHandler := web.NewAccountWebHandler(renderer, tokenService, accountService)
+	storageDi := di.NewRepoContainer(container)
+	serviceDi := di.NewServiceContainer(container, storageDi)
+	handlerDi := di.NewHandlerContainer(container, serviceDi)
 
 	r := routing.SetupRoutes(
 		container,
-		tokenService,
-		accountHandler,
-
-		accountWebHandler,
+		serviceDi,
+		handlerDi,
 	)
 
-	gqlHandler := graphql.NewGQLHandler(container, accountService)
+	gqlHandler := graphql.NewGQLHandler(container, serviceDi)
 	gqlHandler.SetupRoutes(r)
 
 	return &HttpServer{
 		server: &http.Server{
-			Addr:    ":" + cfg.Server.Port,
+			Addr:    ":" + container.Cfg.Server.Port,
 			Handler: r,
 		},
 	}

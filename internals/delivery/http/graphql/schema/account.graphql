@@ -13,3 +13,7 @@ type Account {
     updatedAt: String!
 }
 
+type PaginatedAccounts {
+    accounts: [Account!]!
+    pageInfo: PageInfo!
+}

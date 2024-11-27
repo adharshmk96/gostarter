@@ -3,12 +3,12 @@ package pgstorage
 import (
 	"context"
 	"database/sql"
-	"go.opentelemetry.io/otel/trace"
 	"gostarter/infra"
 	"gostarter/internals/domain"
-	"gostarter/pkg/utils"
 	"log/slog"
 	"time"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 type accountRepository struct {
@@ -84,6 +84,10 @@ const (
 		GROUP BY a.id
 		ORDER BY a.id
 		LIMIT $1 OFFSET $2`
+
+	totalAccountsQuery = `
+		SELECT COUNT(id) FROM gostarter_account
+		`
 )
 
 func (a *accountRepository) CreateAccount(ctx context.Context, account *domain.Account) error {
@@ -311,13 +315,23 @@ func (a *accountRepository) DeleteAccount(ctx context.Context, id int) error {
 	return nil
 }
 
-func (a *accountRepository) ListAccounts(ctx context.Context, pageParams utils.PaginationParams) ([]*domain.Account, error) {
+func (a *accountRepository) ListAccounts(ctx context.Context, pagination *domain.Pagination) ([]*domain.Account, error) {
 	ctx, span := a.tracer.Start(ctx, "AccountRepository.ListAccounts")
 	defer span.End()
 
+	var total int
+
+	err := a.conn.QueryRowContext(ctx, totalAccountsQuery).Scan(&total)
+	if err != nil {
+		a.logger.Error("failed to get total accounts", "error", err)
+		return nil, err
+	}
+
+	pagination.SetTotal(total)
+
 	rows, err := a.conn.QueryContext(ctx, listAccountsQuery,
-		pageParams.Size,
-		pageParams.GetOffset(),
+		pagination.Size,
+		pagination.GetOffset(),
 	)
 	if err != nil {
 		a.logger.Error("failed to list accounts", "error", err)
