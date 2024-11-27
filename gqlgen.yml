@@ -1,6 +1,6 @@
 # Where the schema files are located
 schema:
-  - internals/delivery/http/graphql/schema/*.graphql
+  - internals/delivery/http/graphql/schema/**/*.graphql
 
 # Where the generated server code will be placed
 exec:

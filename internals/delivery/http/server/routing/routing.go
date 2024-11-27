@@ -26,6 +26,7 @@ func SetupRoutes(
 
 	// Setup Middlewares
 	r.Use(middleware.RequestID)
+	r.Use(middleware.Recoverer)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Throttle(12000))
 

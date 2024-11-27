@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"gostarter/infra"
-	"gostarter/pkg/utils"
 	"log/slog"
 
 	"github.com/adharshmk96/goutils/auth"
@@ -95,9 +94,9 @@ func (a *accountService) DeleteAccount(ctx context.Context, id int) error {
 	return a.accountRepo.DeleteAccount(ctx, id)
 }
 
-func (a *accountService) ListAccounts(ctx context.Context, paginationParams utils.PaginationParams) ([]*domain.Account, error) {
+func (a *accountService) ListAccounts(ctx context.Context, pagination *domain.Pagination) ([]*domain.Account, error) {
 	ctx, span := a.tracer.Start(ctx, "AccountService.ListAccounts")
 	defer span.End()
 
-	return a.accountRepo.ListAccounts(ctx, paginationParams)
+	return a.accountRepo.ListAccounts(ctx, pagination)
 }

@@ -28,10 +28,19 @@ func NewAccountWebHandler(
 }
 
 func (h *AccountWebHandler) GetRegisterMember(w http.ResponseWriter, r *http.Request) {
+	_, err := helpers.GetAccountFromContext(r.Context())
+	if err != nil {
+		// user not logged in
+	} else {
+		// redirect
+		http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		return
+	}
+
 	data := map[string]interface{}{
 		"Title": "Register",
 	}
-	err := h.renderer.RenderWithLayout(
+	err = h.renderer.RenderWithLayout(
 		w, "layout/main.html", "register.html", data,
 	)
 	if err != nil {

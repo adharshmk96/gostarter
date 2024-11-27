@@ -4,9 +4,21 @@ package models
 
 import (
 	"fmt"
+	"gostarter/internals/domain"
 	"io"
 	"strconv"
 )
+
+type PageInfo struct {
+	Page  int `json:"page"`
+	Size  int `json:"size"`
+	Total int `json:"total"`
+}
+
+type PaginatedAccounts struct {
+	Accounts []*domain.Account `json:"accounts"`
+	PageInfo *PageInfo         `json:"pageInfo"`
+}
 
 type Query struct {
 }

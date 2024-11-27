@@ -15,9 +15,6 @@ configfile:
 githook:
 	git config core.hooksPath .githooks
 
-init: keys logdir configfile swagger githook
-	go mod tidy
-
 clean:
 	rm -rf .keys
 	rm -rf logs
@@ -29,6 +26,9 @@ install:
 	go install github.com/spf13/cobra-cli@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
 	go install github.com/air-verse/air@latest
+
+init: keys logdir configfile swagger githook
+	go mod tidy
 
 # Code Generation
 
@@ -56,3 +56,4 @@ maiden: install init
 dev:
 	docker compose -f docker-compose.dev.yml up -d
 	air
+
